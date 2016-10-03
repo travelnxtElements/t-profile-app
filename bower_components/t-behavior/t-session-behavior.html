@@ -1,0 +1,173 @@
+<!--
+
+    This behavior restores the session _data.
+    `_data` property need to be provided in folowing format
+
+    var _data : [{
+        key : 'Session_Key', //the session key
+        property: 'Property_Name' //property of the component which needs to be restored.
+    }];
+    
+    The `_storeId` property is the `id` attribute of `t-sessionstorage` component.
+    The default value for `_storeId` is conventional id value of `t-sessionstorage` component throughout application
+    
+    `_onSessionGet` should be the success callback function for `t-sessionstorage`.
+-->
+
+
+<script>
+    (function () {
+
+        TravelNxt = window.TravelNxt || {};
+        TravelNxt.Behaviors = TravelNxt.Behaviors || {};
+        TravelNxt.Behaviors.SessionBehavior = {
+
+            properties: {
+
+                _data: {
+                    type: Array
+                },
+
+                _dataCount: {
+                    type: Number,
+                    readOnly: true
+                },
+
+                _storeId: {
+                    type: String,
+                    value: 'sessionStore'
+                }
+            },
+
+            getSession: function() {
+                if (!this._data || !this._data.length) {
+                    this._onError();
+                    console.warn("no session keys are provided by component - " + this.nodeName.toLowerCase());
+                }
+
+                this._set_dataCount(0);
+
+                this._getSession();
+            },
+
+            setSession: function () {
+                if (!this._data || !this._data.length) {
+                    this._onError();
+                    console.warn("no session keys are provided by component - " + this.nodeName.toLowerCase());
+                }
+
+                this._set_dataCount(0);
+
+                this._setSession();
+            },
+
+            _getSession: function () {
+
+                //all data items are fetched
+                if (this._dataCount >= this._data.length) {
+                    this._onGetComplete();
+                    return;
+                }
+
+                if (this[this._data[this._dataCount].propertyName]) {
+
+                    //update data count
+                    this._set_dataCount(this._dataCount + 1);
+
+                    //get next data element
+                    this._getSession();
+
+                    return;
+                }
+
+                //assign key to storage component
+                this.$[this._storeId].key = this._data[this._dataCount].key;
+
+                //get data item
+                this.$[this._storeId].load();
+            },
+
+            _setSession: function () {
+
+                //all data items are saved
+                if (this._dataCount >= this._data.length) {
+                    this._onSetComplete();
+                    return;
+                }
+
+                //assign key to storage component
+                this.$[this._storeId].key = this._data[this._dataCount].key;
+
+                //assign value to storage component
+                this.$[this._storeId].value = this._data[this._dataCount].value || null;
+
+                //save data item
+                this.$[this._storeId].save();
+            },
+
+            _onSessionGet: function(e) {
+
+                if (!this.$[this._storeId].value) {
+                    this._onError();
+                    console.warn("Session value for key " + this.$[this._storeId].key + " in " + this.nodeName.toLowerCase() + " component not found!");
+                }
+
+                var loadedSessionKey = this._data[this._dataCount];
+
+                if (!loadedSessionKey || !loadedSessionKey.propertyName) {
+                    var prop = loadedSessionKey && loadedSessionKey.propertyName ? loadedSessionKey.propertyName : '';
+                    this._onError();
+                    console.warn("Property name '" + prop + "' to restore session value not found!");
+                }
+
+                //set the property name with session store value
+                this[loadedSessionKey.propertyName] = this.$[this._storeId].value;
+
+                //reset session
+                this.$[this._storeId].value = null;
+                this.$[this._storeId].loaded = false;
+
+                //update data count
+                this._set_dataCount(this._dataCount + 1);
+
+                //get next data element
+                this._getSession();
+            },
+
+            _onSessionSave: function() {
+
+                if (this._data[this._dataCount].value !== this.$[this._storeId].value) {
+                    this._onError();
+                    console.warn("Failed to save " + this.$[this._storeId].key + " for " + this.nodeName.toLowerCase() + " component!");
+                }
+
+                if (!this._data[this._dataCount]) {
+                    this._onError();
+                    console.warn("Property name '" + prop + "' to restore session value not found!");
+                }
+
+                //reset session
+                this.$[this._storeId].value = null;
+                this.$[this._storeId].loaded = false;
+
+                //update data count
+                this._set_dataCount(this._dataCount + 1);
+
+                //set next data element
+                this._setSession();
+            },
+
+            _onGetComplete: function () {
+                this.fire('session-get-complete',{}, { bubbles: false });
+            },
+
+            _onSetComplete: function () {
+                this.fire('session-set-complete',{}, { bubbles: false });
+            },
+
+            _onError: function () {
+                this.fire('session-error');
+            }
+        };
+    })();
+</script>

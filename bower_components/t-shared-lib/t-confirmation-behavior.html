@@ -1,0 +1,148 @@
+<script>
+    (function () {
+
+        'use strict'
+
+        var TravelNxt = window.TravelNxt || {};
+        TravelNxt.Behaviors = window.TravelNxt.Behaviors || {};
+        /*
+        @polymerBehavior 
+        */
+        TravelNxt.Behaviors.ConfirmationBehavior = {
+
+            properties: {
+                /**
+                 * Stores confirmation number
+                 * @type {String}
+                 */
+                confirmationNumber: {
+                    type: String
+                }
+            },
+
+            observers:[
+                '__pageLoad(visible)'
+            ],
+
+            listeners: {
+                'policy-click': '_showPolicies',
+                'session-get-complete': '_updatePage'
+            },
+
+            /*
+             * <p>this method gets called when page becomes visible</p>
+             * <p>`go-to-search` event is fired if `bookedItinerary` property is not set.</p>
+            */
+            __pageLoad: function(visible) {
+                if (!visible) {
+                    return;
+                }
+                this.$.notify.active = false;
+
+                //initiate policy component
+                this.$.policy.initiatePolicyView();
+
+                this._syncSession();
+            },
+
+            _syncSession: function () {
+                this._data = [{
+                    key: 'Car_Booked_Itinerary',
+                    propertyName: 'bookedItinerary'
+                }];
+                this.getSession();
+            },
+
+            _updatePage: function  () {
+
+                if (!this.bookedItinerary) {
+                    this.fire('go-to-search');
+                    return;
+                }
+
+                this._setFareDetails();
+
+                this._getConfirmationMessage();
+
+                this._setConfirmationNumber();
+            },
+
+            /*
+             * <p>this method gets called when policy link in `t-car-itinerary-details` component is clicked.</p>
+             * <p>It is triggered by the `policy-click` listener.</p>
+            */
+            _showPolicies: function () {
+                this.$.policy.initiatePolicyCall();
+            },
+
+            /*
+             * <p>This method constructs success message and triggers `confirmation-success` event</p>
+            */
+            _getConfirmationMessage: function () {
+
+                this.$.notify.message = 'Your booking is complete. Your trip ID is ' + this.bookedItinerary.confirmationNumber + '. A confirmation email has been sent to ' + this.bookedItinerary.passengers[0].emailAddress;
+                this.$.notify.active = true;
+                this.fire('confirmation-success');
+            },
+
+            /*
+             * <p>This method translates booked itinerary to set properties of internal view components</p>
+            */
+            _setFareDetails: function () {
+                if (!this.bookedItinerary || !this.bookedItinerary.itinerary || !this.bookedItinerary.searchCriteria) {
+                    return;
+                }
+
+                var formattedDate = this._getDateComponents(this.bookedItinerary.searchCriteria.pickupDate);
+                this.pickupDate = formattedDate.date + ' ' + formattedDate.shortMonth + ' ' + this.bookedItinerary.searchCriteria.pickupTime;
+
+                formattedDate = this._getDateComponents(this.bookedItinerary.searchCriteria.dropoffDate);
+                this.dropoffDate = formattedDate.date + ' ' + formattedDate.shortMonth + ' ' + this.bookedItinerary.searchCriteria.dropoffTime;
+
+                this.$.fareDetails.baseFareLabel = 'Avg. per day rate x ' + this._dateDiff(this.pickupDate, this.dropoffDate);
+
+                if (this.bookedItinerary.itinerary.fare && this.bookedItinerary.itinerary.fare.components) {
+                    this.$.fareDetails.data = this.bookedItinerary.itinerary.fare.components;
+                }
+            },
+
+            /*
+             * <p>This method capitalizes the passenger names</p>
+            */
+            _capitalize: function (str) {
+                if (!arguments.length) {
+                    return;
+                }
+                var str = Array.prototype.slice.call(arguments);
+                str = str.join(' ');
+                return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function (letter, index) {
+                    return letter.toUpperCase();
+                }).replace(/\s+/g, ' ');
+            },
+
+            /*
+             * <p>This method extracts confirmation number from booked itinerary</p>
+             * <p>`confirmationNumber` is displayed if `vendorConfirmationNumber` is not available</p>
+            */
+            _setConfirmationNumber: function () {
+
+                if (!this.bookedItinerary.passengerSegment) {
+                    this.confirmationNumber = this.bookedItinerary.confirmationNumber;
+                    return
+                }
+
+                if (this.bookedItinerary.passengerSegment.vendorConfirmationNumber) {
+                    this.confirmationNumber = this.bookedItinerary.passengerSegment.vendorConfirmationNumber;
+                    return;
+                } else if (this.bookedItinerary.passengerSegment.confirmationNumber) {
+                    this.confirmationNumber = this.bookedItinerary.passengerSegment.confirmationNumber;
+                    return;
+                } else {
+                    this.confirmationNumber = this.bookedItinerary.confirmationNumber;
+                    return;
+                }
+            }
+        };
+
+    })();
+</script>

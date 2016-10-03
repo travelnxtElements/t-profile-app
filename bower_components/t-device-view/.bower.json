@@ -1,0 +1,44 @@
+{
+  "name": "t-device-view",
+  "version": "1.0.1",
+  "authors": [
+    "Rahul Pilkhwal <rahul.pilkhwal@tavisca.com>",
+    "Shailesh Kumar Srivastava <ssrivastava@tavisca.com>",
+    "Sounak Pal <spal@tavisca.com>",
+    "Ajinkya Tejankar <tejankarajinkya@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "keywords": [
+    "Polymer",
+    "Web",
+    "Components"
+  ],
+  "homepage": "https://github.com/atomelements/t-device-view",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.0.0"
+  },
+  "devDependencies": {
+    "web-component-tester": "*",
+    "webcomponentsjs": "^0.7.14",
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.6"
+  },
+  "_release": "1.0.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.0.1",
+    "commit": "8963670cd9d259fb503db0448c4f00646da4c779"
+  },
+  "_source": "git://github.com/atomelements/t-device-view.git",
+  "_target": "^1.0.0",
+  "_originalSource": "atomelements/t-device-view"
+}

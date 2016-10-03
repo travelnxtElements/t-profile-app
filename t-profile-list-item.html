@@ -1,0 +1,79 @@
+<link rel="import" href="../polymer/polymer.html" />
+<link rel="import" href="../paper-menu-button/paper-menu-button.html" />
+<link rel="import" href="../paper-menu/paper-menu.html" />
+<link rel="import" href="../paper-item/paper-item.html" />
+
+<link rel="import" href="../t-text-container/travel-element-styles.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
+
+<dom-module id="t-profile-list-item">
+<!-- The list item will only take a binding as you pass from its parent
+    and will pass an object when clicked on delete or edit with an event.... -->
+    <template>
+        <style include="travel-element-styles"></style>
+        <style include="iron-flex">
+            :host {
+                display: block;
+                font-family: var(--primary-font-family);
+            }
+            .section-small{
+                padding-right: 0;
+            }
+            .button {
+                padding: 0;
+            }
+            .dropdown-content{
+                padding: 0;
+            }
+            .label {
+                color: var(--primary-text-color, #333);
+                padding-right: 5px;
+            }
+        </style>
+
+        <div class="layout horizontal section-small font-12">
+            <div class="flex label font-12">
+                [[label]]
+            </div>
+          <paper-menu-button class="button" horizontal-offset="-50" vertical-offset="30">
+            <iron-icon icon="more-vert" class="dropdown-trigger secondary-text" alt="menu"></iron-icon>
+            <paper-menu class="dropdown-content">
+                <paper-item type="edit" on-tap="_click">Edit</paper-item>
+                <paper-item type="delete" on-tap="_click">Delete</paper-item>
+            </paper-menu>
+          </paper-menu-button>
+        </div>
+
+    </template>    
+    <script>
+        (function () {
+            Polymer({
+                is: 't-profile-list-item',
+                
+                
+                properties: {
+                    
+                    //pass the label you can do multiple binding from outside.
+                    label: {
+                        type:String,
+                        value: 'Label'
+                    },
+
+                    //pass the data object to pass in the event with
+                    data: {
+                        type:Object,
+                        value: function(){
+                            return {};
+                        }
+                    }
+
+                },
+
+                _click: function(e){
+                    console.log(e);
+                    this.fire(e.srcElement.getAttribute('type') + '-click', this.data);
+                }
+            });        
+        })();
+    </script>
+</dom-module>

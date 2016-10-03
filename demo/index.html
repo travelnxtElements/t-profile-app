@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>t-profile-app demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="../../t-shared-components/theme.html">
+    <style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    </style>
+    <link rel="import" href="../t-profile-app.html">
+</head>
+
+<body>
+    <template is="dom-bind" id="app">
+        <app-location use-hash-as-path route="{{route}}"></app-location>
+        <app-route route="{{route}}">
+        </app-route>
+        <t-profile-app navigation-data="[[navigationData]]" profile-info="[[profileInfo]]" visible route="[[route]]" site-url="#/"></t-profile-app>
+    </template>
+</body>
+<script>
+var app = document.querySelector('#app');
+app.profileInfo = {
+    "passengers": {
+        "header": "Travelers List",
+        "format": ["firstName", "lastName", "dateOfBirth"],
+        "data": [{
+            "id": "12",
+            "title": "Mr",
+            "firstName": "SomePag",
+            "middleName": "Something",
+            "lastName": "Something",
+            "suffix": "Something",
+            "dateOfBirth": "01/01/2001"
+        }, {
+            "id": "12",
+            "title": "Mr",
+            "firstName": "SomePag",
+            "middleName": "Something",
+            "lastName": "Something",
+            "suffix": "Something",
+            "dateOfBirth": "01/01/2001"
+        }, {
+            "id": "12",
+            "title": "Mr",
+            "firstName": "SomePag",
+            "middleName": "Something",
+            "lastName": "Something",
+            "suffix": "Something",
+            "dateOfBirth": "01/01/2001"
+        }]
+    },
+    "frequentFlyers": {
+        "header": "Flight Membership",
+        "format": ["name"],
+        "data": [{
+            "id": 1,
+            "name": "Some crazy frequent flyer name"
+        }, {
+            "id": 1,
+            "name": "Some crazy frequent flyer name"
+        }, {
+            "id": 1,
+            "name": "Some crazy frequent flyer name"
+        }]
+    },
+    "addresses": {
+        "header": "Address List",
+        "format": ["address1", "state", "zip"],
+        "data": [{
+            "id": 1,
+            "address1": "Some addres",
+            "address2": "Some addres2",
+            "country": "Some country",
+            "state": "Some state",
+            "zip": "Some zip",
+        }, {
+            "id": 1,
+            "address1": "Some addres",
+            "address2": "Some addres2",
+            "country": "Some country",
+            "state": "Some state",
+            "zip": "Some zip",
+        }]
+    }
+};
+app.navigationData = [{
+    "name": "Personal Info",
+    "type": "info",
+    "category": "passenger",
+    "param": "?id=self"
+}, {
+    "name": "Communication Details",
+    "type": "info",
+    "category": "communication"
+}, {
+    "name": "Passenger List/Other Travelers",
+    "type": "list",
+    "category": "passengers"
+}, {
+    "name": "Flight Membership",
+    "type": "list",
+    "category": "frequentFlyers"
+}, {
+    "name": "Address",
+    "type": "list",
+    "category": "addresses"
+}, {
+    "name": "Change Password",
+    "type": "info",
+    "category": "password"
+}]
+</script>
+
+</html>

@@ -1,0 +1,47 @@
+/**
+ * `translator behavior` provides the common properties and observer function used across all the `translator components`
+ * @polymerBehavior TravelNxt.Behaviors.TranslatorBehavior
+ */
+<script>
+
+    (function(window, undefined) {
+
+        'use strict'
+
+        window.TravelNxt = window.TravelNxt || {};
+        window.TravelNxt.Behaviors = window.TravelNxt.Behaviors || {};
+        window.TravelNxt.Behaviors.TranslatorBehavior = {
+
+            properties: {
+
+                /**
+                 * This is the object which will be translated
+                 * It is an observer which triggers `__translate` method on change
+                 */
+            	input : {
+            		type: Object,
+            		observer: '__translate'
+            	},
+
+                /**
+                 * This property is set once `__translate` method gets called.
+                 * listen to `on-output-changed` event to get notified with the change in this property
+                 */
+            	output: {
+            		type: Object,
+            		notify: true,
+                    readOnly: true
+            	}
+            },
+
+            /**
+             * This is the default observer function for `input` property.
+             * Translator components can override it to add custom logic in it.
+             */
+            __translate: function () {
+            	this._setOutput(this.input || {});
+            }
+        };
+    })(window);
+
+</script>

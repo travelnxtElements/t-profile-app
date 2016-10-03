@@ -1,0 +1,293 @@
+<link rel="import" href="../polymer/polymer.html"/>
+<link rel="import" href="../iron-pages/iron-pages.html">
+<link rel="import" href="../app-route/app-route.html">
+<link rel="import" href="../t-notify/t-notify.html">
+<link rel="import" href="../t-header/t-header.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../t-text-container/travel-element-styles.html">
+<link rel="import" href="../app-route/app-location.html">
+
+<link rel="import" href="t-profile-list-page.html">
+
+<!--
+A comment describing this element
+queryParams Eg:
+The urls we are trying to hit and form the app
+/list/passengers
+/list/frequentFlyers
+/list/addresses
+
+/info/self
+/info/communication
+/info/password
+/info/passenger?id=new
+/info/passenger?id=1
+/info/address?id=new
+/info/address?id=1
+/info/frequentFlyers?id=new
+/info/frequentFlyers?id=1
+
+
+The Profile app will have two data objects to pass to list and info page.
+this.navigationData =[{
+    "name": "Personal Info",
+    "type": "info",
+    "category": "passenger",
+    "param": "?id=self"
+}, {
+    "name": "Communication Details",
+    "type": "info",
+    "category": "communication"
+}, {
+    "name": "Passenger List/Other Travelers",
+    "type": "list",
+    "category": "passengers"
+}, {
+    "name": "Flight Membership",
+    "type": "list",
+    "category": "frequentFlyers"
+}, {
+    "name": "Address",
+    "type": "list",
+    "category": "addresses"
+}, {
+    "name": "Change Password",
+    "type": "info",
+    "category": "password"
+}];
+
+this.profileInfo: {
+  "passengers": {
+        "header": "Travelers List",
+        "format": ["firstName", "lastName", "dateOfBirth"],
+        "data": [{
+            "id": "12",
+            "title": "Mr",
+            "firstName": "SomePag",
+            "middleName": "Something",
+            "lastName": "Something",
+            "suffix": "Something",
+            "dateOfBirth": "01/01/2001"
+        }, {
+            "id": "12",
+            "title": "Mr",
+            "firstName": "SomePag",
+            "middleName": "Something",
+            "lastName": "Something",
+            "suffix": "Something",
+            "dateOfBirth": "01/01/2001"
+        }, {
+            "id": "12",
+            "title": "Mr",
+            "firstName": "SomePag",
+            "middleName": "Something",
+            "lastName": "Something",
+            "suffix": "Something",
+            "dateOfBirth": "01/01/2001"
+        }]
+    },
+    "frequentFlyers": {
+        "header": "Flight Membership",
+        "format": ["name"],
+        "data": [{
+            "id": 1,
+            "name": "Some crazy frequent flyer name"
+        }, {
+            "id": 1,
+            "name": "Some crazy frequent flyer name"
+        }, {
+            "id": 1,
+            "name": "Some crazy frequent flyer name"
+        }]
+    },
+    "addresses": {
+        "header": "Address List",
+        "format": ["address1", "state","zip"],
+        "data": [{
+            "id": 1,
+            "address1": "Some addres",
+            "address2": "Some addres2",
+            "country": "Some country",
+            "state": "Some state",
+            "zip": "Some zip",
+        }, {
+            "id": 1,
+            "address1": "Some addres",
+            "address2": "Some addres2",
+            "country": "Some country",
+            "state": "Some state",
+            "zip": "Some zip",
+        }]
+    }
+}
+
+Example:
+
+    <t-profile-app></t-profile-app>
+
+Example:
+
+    <t-profile-app>
+      <h2>Hello t-profile-app</h2>
+    </t-profile-app>
+
+@demo demo/index.html
+-->
+<dom-module id="t-profile-app">
+    <template>
+        <style include="travel-element-styles"></style>
+        <style include="iron-flex">
+            :host {
+                display: block;
+                font-family: var(--primary-font-family)
+            }
+            
+            .main-nav a {
+              text-decoration: none;
+              /*font-weight: normal;*/
+            }
+            /*patch to make nav height 48*/
+            .main-nav .icon{
+              width: 27px;
+              height: 27px;
+            }
+        </style>
+
+        <t-notify 
+            id="notify" 
+            message="No results found." 
+            type="warn">                
+        </t-notify>
+        <app-route
+            id="route"
+            route="{{route}}" 
+            pattern="/:page" 
+            data="{{routeData}}"
+            tail="{{subroute}}">
+        </app-route>
+        
+        <iron-pages role="main" selected="{{page}}" attr-for-selected="name" selected-attribute="visible">
+            <!-- [] -->
+            
+            <div 
+              id="home" 
+              name="home" 
+              class="main-nav">
+              <t-header normal-heading label="Profile">
+              </t-header>
+              <template is="dom-repeat" items="[[navigationData]]" as="item">
+                  <a  class="layout horizontal center section-small font-14 secondary-text border-bottom" href='[[siteUrl]][[item.type]]/[[item.category]][[item.param]]'>
+                      <span class="flex">[[item.name]]</span>
+                      <iron-icon class="icon" icon="icons:chevron-right"></iron-icon>
+                  </a>
+              </template>
+            </div>
+            <t-profile-list-page
+              id="list"
+              name="list"
+              site-url="[[siteUrl]]"
+              input="[[listData]]"
+              >
+            </t-profile-list-page>
+        </iron-pages>
+
+    </template>
+    <script>
+        (function () {
+
+            Polymer({
+                is: 't-profile-app',
+
+                behaviors: [
+                    //TravelNxt.Behaviors.SessionBehavior
+                ],
+
+                properties: {
+
+                    //this the object to give all data to populate list.
+                    //this data should be synced with navigation data to be synced.
+                    profileInfo:Object,
+
+                    navigationData:Array,
+
+                    visible: {
+                        type: Boolean,
+                        value: false,
+                        notify: true
+                    },
+
+                    siteAbsUrl: String,
+
+                    route: {
+                        type: Object,
+                        notify: true
+                    },
+
+                    page: {
+                        type: String,
+                        value: 'home',
+                        reflectToAttribute: true
+                    },
+
+                    successIcon: {
+                        type: String,
+                        value: 'bgv:check-mark'
+                    },
+
+                    headerBackIcon: {
+                        type: String,
+                        value: 'bgv:arrow-left'
+                    }
+                },
+
+                listeners: {
+                    'edit-click': '_goToSearch',
+                    'search-page-success': '_searchPageSucces',
+                    'go-to-search': '_goToSearch'
+                },
+
+                observers: [
+                    '__routePageChanged(route.path)',
+                    //'__paxMappingChanged(searchCriteria.adultCount, searchCriteria.childCount)'
+                ],
+
+                __routePageChanged: function (path) {
+                    setTimeout(function () {
+                        if (!this.visible || path === undefined || path === null) {
+                            return;
+                        }
+
+                        path = path.replace(/\//g, '');
+                        if (this.page && this.page.toLowerCase() === path.toLowerCase()) {
+                            return;
+                        }
+
+                        this.page = this.routeData.page || 'home';
+                       // this._setHeaderDataEvent(this.page);
+                        if(this.routeData.page == 'list'){
+                          var listType = this.subroute.path.replace(/\//g, '');
+                          this.listData = this.profileInfo[listType];
+                        }
+
+                    }.bind(this), 10);
+                },
+
+                _searchPageSucces: function (e) {
+                    this.searchCriteria = e.detail.data;
+                    this._goToResults();
+                },
+
+                _goToSearch: function (e) {
+                    console.log(e);
+                    //this.set('route.path', 'home');
+                },
+
+
+                _goToFailurePage: function (e) {
+                    this.set('route.path', 'failure');
+                }
+            });
+        })();
+    </script>
+</dom-module>
