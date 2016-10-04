@@ -26,7 +26,7 @@
             normal-heading
             url="[[siteUrl]]home"
             label="[[_getHeader(input)]]"></t-header>
-            <div class="link-style section-small font-12 addButton">
+            <div class="link-style section-small font-12 addButton" on-tap="_fireAddNew">
                 <iron-icon class="icon" icon="add"></iron-icon>Add new
             </div>
         <template is="dom-repeat" items="[[input.data]]" as="item" on-dom-change="_templateChange">
@@ -49,6 +49,10 @@
                 _templateChange: function(e,a){
                     console.log(e);
                     console.log(a);
+                },
+
+                _fireAddNew: function(){
+                    this.fire('added-new')
                 },
 
                 _getHeader: function(input){

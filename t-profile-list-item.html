@@ -1,7 +1,6 @@
 <link rel="import" href="../polymer/polymer.html" />
 <link rel="import" href="../paper-menu-button/paper-menu-button.html" />
 <link rel="import" href="../paper-menu/paper-menu.html" />
-<link rel="import" href="../paper-item/paper-item.html" />
 
 <link rel="import" href="../t-text-container/travel-element-styles.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
@@ -29,17 +28,20 @@
                 color: var(--primary-text-color, #333);
                 padding-right: 5px;
             }
+            .item {
+                min-width: 50px;
+            }
         </style>
 
         <div class="layout horizontal section-small font-12">
             <div class="flex label font-12">
                 [[label]]
             </div>
-          <paper-menu-button class="button" horizontal-offset="-50" vertical-offset="30">
-            <iron-icon icon="more-vert" class="dropdown-trigger secondary-text" alt="menu"></iron-icon>
+          <paper-menu-button class="button secondary-text" horizontal-offset="-50" vertical-offset="20">
+            <iron-icon icon="more-vert" class="dropdown-trigger" alt="menu"></iron-icon>
             <paper-menu class="dropdown-content">
-                <paper-item type="edit" on-tap="_click">Edit</paper-item>
-                <paper-item type="delete" on-tap="_click">Delete</paper-item>
+                <div class="section-small item font-12" type="edit" on-tap="_click">Edit</div>
+                <div class="section-small item font-12" type="delete" on-tap="_click">Delete</div>
             </paper-menu>
           </paper-menu-button>
         </div>

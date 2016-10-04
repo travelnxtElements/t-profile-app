@@ -187,8 +187,7 @@ Example:
               id="list"
               name="list"
               site-url="[[siteUrl]]"
-              input="[[listData]]"
-              >
+              input="[[listData]]">
             </t-profile-list-page>
         </iron-pages>
 
@@ -242,9 +241,9 @@ Example:
                 },
 
                 listeners: {
-                    'edit-click': '_goToSearch',
-                    'search-page-success': '_searchPageSucces',
-                    'go-to-search': '_goToSearch'
+                    'added-new': '_newListItemAdded',
+                    'edit-click': '_clickedOnEdit',
+                    'delete-click': '_clickedOnDelete'
                 },
 
                 observers: [
@@ -272,15 +271,25 @@ Example:
 
                     }.bind(this), 10);
                 },
-
-                _searchPageSucces: function (e) {
-                    this.searchCriteria = e.detail.data;
-                    this._goToResults();
+                //new list item
+                _newListItemAdded: function(){
+                  //this.route('route.path', 'info/'+ this.subroute.path.replace(/\//g, '') + '?id=new');
                 },
 
-                _goToSearch: function (e) {
-                    console.log(e);
-                    //this.set('route.path', 'home');
+                _clickedOnDelete: function (e) {
+                    //run the delete method call some api component or translator decorator
+
+                },
+
+                _clickedOnEdit: function (e) {
+                    // console.log(e);
+
+                    // this.set('route.path', 'info/'+ this.subroute.path.replace(/\//g, '') + '?id=' + e.detail.id);
+
+                    // this.info.someProperty = this.subroute.path.replace(/\//g, '');
+                    // if(i have a param){
+                    //   this.info.data = e.detail(or some translated object);
+                    // }
                 },
 
 
