@@ -9,6 +9,7 @@
 <link rel="import" href="../app-route/app-location.html">
 
 <link rel="import" href="t-profile-list-page.html">
+<link rel="import" href="t-profile-info-page.html">
 
 <!--
 A comment describing this element
@@ -187,8 +188,16 @@ Example:
               id="list"
               name="list"
               site-url="[[siteUrl]]"
+              format-data="[[listFormat]]"
               input="[[listData]]">
             </t-profile-list-page>
+            <t-profile-info-page
+              id="info"
+              name="info"
+              site-url="[[siteUrl]]"
+              format-data="[[infoFormat]]"
+              input="[[infoData]]">
+            </t-profile-info-page>
         </iron-pages>
 
     </template>
@@ -207,6 +216,9 @@ Example:
                     //this the object to give all data to populate list.
                     //this data should be synced with navigation data to be synced.
                     profileInfo:Object,
+
+                    //this the object to give all data to populate header and format of the list
+                    listFormats:Object,
 
                     navigationData:Array,
 
@@ -266,6 +278,7 @@ Example:
                        // this._setHeaderDataEvent(this.page);
                         if(this.routeData.page == 'list'){
                           var listType = this.subroute.path.replace(/\//g, '');
+                          this.listFormat = this.listFormats[listType];
                           this.listData = this.profileInfo[listType];
                         }
 

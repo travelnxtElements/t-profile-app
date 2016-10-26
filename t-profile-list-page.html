@@ -1,78 +1,84 @@
 <link rel="import" href="../polymer/polymer.html" />
-
 <link rel="import" href="../t-text-container/travel-element-styles.html">
 <link rel="import" href="t-profile-list-item.html">
 <dom-module id="t-profile-list-page">
-<!-- The list page will allow to populate all three list .. the profile app will set the data for state change according to its query Parameter.... -->
+    <!-- The list page will allow to populate all three list .. the profile app will set the data for state change according to its query Parameter.... -->
     <template>
         <style include="travel-element-styles">
-            :host {
-                display: block;
-            }
-            .addButton{
-                padding-left: 0;
-                display: inline-block;
-                cursor: pointer;
-                margin-bottom: -10px;
-            }
-            .addButton .icon{
-                width: 19px;
-                height: 19px;
-                vertical-align: middle;
-                margin: 0 3px 0 5px;
-            }
+        :host {
+            display: block;
+        }
+        
+        .addButton {
+            padding-left: 0;
+            display: inline-block;
+            cursor: pointer;
+            margin-bottom: -10px;
+        }
+        
+        .addButton .icon {
+            width: 19px;
+            height: 19px;
+            vertical-align: middle;
+            margin: 0 3px 0 5px;
+        }
         </style>
-        <t-header
-            normal-heading
-            url="[[siteUrl]]home"
-            label="[[_getHeader(input)]]"></t-header>
-            <div class="link-style section-small font-12 addButton" on-tap="_fireAddNew">
-                <iron-icon class="icon" icon="add"></iron-icon>Add new
-            </div>
-        <template is="dom-repeat" items="[[input.data]]" as="item" on-dom-change="_templateChange">
-            <t-profile-list-item
-                data="[[item]]"
-                label="[[_getLabel(item)]]">
+        <t-header normal-heading url="[[siteUrl]]home" label="[[_getHeader(formatData)]]"></t-header>
+        <div class="link-style section-small font-12 addButton" on-tap="_fireAddNew">
+            <iron-icon class="icon" icon="add"></iron-icon>Add new
+        </div>
+        <template is="dom-repeat" items="[[input]]" as="item" on-dom-change="_templateChange">
+            <t-profile-list-item data="[[item]]" label="[[_getLabel(item)]]">
             </t-profile-list-item>
         </template>
-
-    </template>    
+    </template>
     <script>
-        (function () {
-            Polymer({
-                is: 't-profile-list-page',
-                
-                properties: {
+    (function() {
+        Polymer({
+            is: 't-profile-list-page',
 
-                },
+            properties: {
 
-                _templateChange: function(e,a){
-                    console.log(e);
-                    console.log(a);
-                },
-
-                _fireAddNew: function(){
-                    this.fire('added-new')
-                },
-
-                _getHeader: function(input){
-                    return input.header || 'List';
-                },
-                
-                _getLabel: function(item){
-                    var format = this.input.format;
-                    if(!format){
-                        return item.id;
-                    }
-                    var formatArray = [];
-
-                    for(var i = 0; i < format.length; i++){
-                        formatArray.push(item[format[i]]);
-                    }
-                    return formatArray.join(' ');
+                //pass the format data to show correct header and correct format of the list item text.
+                formatData: {
+                    type: Object
                 }
 
-            });        
-        })();
+            },
+
+            _templateChange: function(e, a) {
+                console.log(e);
+                console.log(a);
+            },
+
+            _fireAddNew: function() {
+                this.fire('added-new')
+            },
+
+            _getHeader: function(formatData) {
+                return formatData.header || 'List';
+            },
+
+            _getLabel: function(item) {
+                var format = this.formatData.format;
+
+                if (!format) {
+                    return item.id;
+                }
+                var formatArray = [];
+
+                for (var i = 0; i < format.length; i++) {
+                    var props = format[i].split('.');
+                    var tempItem=item;
+                    for (var ii = 0; ii < props.length; ii++) {
+                        tempItem=tempItem[props[ii]];
+                    }
+                    formatArray.push(tempItem);
+                }
+                return formatArray.join(' ');
+            }
+
+        });
+    })();
     </script>
 </dom-module>

@@ -1,0 +1,35 @@
+<link rel="import" href="../polymer/polymer.html" />
+
+<link rel="import" href="../t-text-container/travel-element-styles.html">
+<dom-module id="t-profile-info-page">
+<!-- The info page will handle all the forms according to the request.... -->
+    <template>
+        <style include="travel-element-styles">
+            :host {
+                display: block;
+            }
+        </style>
+        <t-header
+            normal-heading
+            url="[[siteUrl]]home"
+            label="Ssasa"></t-header>
+            
+
+    </template>    
+    <script>
+        (function () {
+            Polymer({
+                is: 't-profile-info-page',
+                
+                properties: {
+
+                },
+
+                _getHeader: function(formatData){
+                    return formatData.header || 'Info';
+                }
+
+            });        
+        })();
+    </script>
+</dom-module>

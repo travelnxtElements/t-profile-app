@@ -7,6 +7,10 @@
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="../../t-shared-components/theme.html">
+    <link rel="import" href="../../t-mystique-auth/t-mystique-auth.html">
+    <link rel="import" href="../../iron-ajax/iron-ajax.html">
+    <link rel="import" href="../../t-sign-in/t-sign-in.html">
+    <link rel="import" href="../../t-sign-in/t-sign-in-api.html">
     <style>
     body {
         margin: 0;
@@ -21,101 +25,128 @@
         <app-location use-hash-as-path route="{{route}}"></app-location>
         <app-route route="{{route}}">
         </app-route>
-        <t-profile-app navigation-data="[[navigationData]]" profile-info="[[profileInfo]]" visible route="[[route]]" site-url="#/"></t-profile-app>
+        <t-mystique-auth name="mystiquedemo" url="[[apiBaseUrl]]api/authentication/authenticate/context" token-response="{{tokenResponse}}" auto>
+        </t-mystique-auth>
+        <t-sign-in id="loginView" username="{{userName}}" hidden$="[[signedIn]]"></t-sign-in>
+        <t-sign-in-api id="loginApi" loading={{loading}} api-base-url="[[apiBaseUrl]]" api-relative-url="api/authentication/authenticate/user" auth-token="{{tokenResponse.authenticationToken}}"></t-sign-in-api>
+      
+        <iron-ajax id="ajax" url="{{apiBaseUrl}}api/User/get/username/[[userName]]?token={{tokenResponse.authenticationToken}}" handle-as="json" on-response="handleResponse"></iron-ajax>
+        <iron-ajax id="updateAjax" url="{{apiBaseUrl}}api/User/get/[[userId]]?token={{tokenResponse.authenticationToken}}" handle-as="json" on-response="_setProfileData"></iron-ajax>
+
+        <template is="dom-if" if="[[signedIn]]">
+            <t-profile-app navigation-data="[[navigationData]]" profile-info="[[profileInfo]]" list-formats="[[listFormats]]" visible route="[[route]]" site-url="#/"></t-profile-app>
+        </template>
     </template>
 </body>
 <script>
-var app = document.querySelector('#app');
-app.profileInfo = {
-    "passengers": {
-        "header": "Travelers List",
-        "format": ["firstName", "lastName", "dateOfBirth"],
-        "data": [{
-            "id": "0",
-            "title": "Mr",
-            "firstName": "Primary",
-            "middleName": "Something",
-            "lastName": "Profile",
-            "suffix": "Something",
-            "dateOfBirth": "01/01/2001"
-        }, {
-            "id": "12",
-            "title": "Mr",
-            "firstName": "SomePag",
-            "middleName": "Something",
-            "lastName": "Something",
-            "suffix": "Something",
-            "dateOfBirth": "01/01/2001"
-        }, {
-            "id": "12",
-            "title": "Mr",
-            "firstName": "SomePag",
-            "middleName": "Something",
-            "lastName": "Something",
-            "suffix": "Something",
-            "dateOfBirth": "01/01/2001"
-        }]
-    },
-    "frequentFlyers": {
-        "header": "Flight Membership",
-        "format": ["name"],
-        "data": [{
-            "id": 1,
-            "name": "Some crazy frequent flyer name"
-        }, {
-            "id": 1,
-            "name": "Some crazy frequent flyer name"
-        }, {
-            "id": 1,
-            "name": "Some crazy frequent flyer name"
-        }]
-    },
-    "addresses": {
-        "header": "Address List",
-        "format": ["address1", "state", "zip"],
-        "data": [{
-            "id": 1,
-            "address1": "Some addres",
-            "address2": "Some addres2",
-            "country": "Some country",
-            "state": "Some state",
-            "zip": "Some zip",
-        }, {
-            "id": 1,
-            "address1": "Some addres",
-            "address2": "Some addres2",
-            "country": "Some country",
-            "state": "Some state",
-            "zip": "Some zip",
-        }]
+app.signedIn = false;
+app.apiBaseUrl = "http://demo.travelnxt.com/";
+
+window.addEventListener('WebComponentsReady', function(e) {
+    var app = document.querySelector('#app');
+    var loginView = document.querySelector('#loginView');
+    var loginApi = document.querySelector('#loginApi');
+
+    loginView.addEventListener('t-sign-in-authenticate', loginApi.onAuthenticate.bind(loginApi));
+
+    loginApi.addEventListener('t-sign-in-api-success', function(e) {
+        loginView.onAuthenticateSuccess.bind(loginView);
+        app.signedIn = true;
+        app.$.ajax.generateRequest();
+    });
+    loginApi.addEventListener('t-sign-in-api-error', loginView.onAuthenticateError.bind(loginView));
+
+    //this is based on all the possible list routes
+    app.listFormats = {
+        "fellowTravellers": {
+            "header": "Travelers List",
+            "format": ["personalDetails.name.abc", "personalDetails.name.firstName", "personalDetails.name.lastName"]
+        },
+        "memberships": {
+            "header": "Memberships",
+            "format": ["productType","providerName","providerCode"]
+        },
+        "addresses": {
+            "header": "Address List",
+            "format": ["addressLine1", "addressLine2","city","state", "country"]
+        }
+    };
+    //this is based on all the possible info routes
+    app.infoFormats = {}
+    app.navigationData = [{
+        "name": "Personal Info",
+        "type": "info",
+        "category": "passenger",
+        "param": "?id=0"
+    }, {
+        "name": "Communication Details",
+        "type": "info",
+        "category": "communication"
+    }, {
+        "name": "Passenger List/Other Travelers",
+        "type": "list",
+        "category": "fellowTravellers"
+    }, {
+        "name": "Flight Membership",
+        "type": "list",
+        "category": "memberships"
+    }, {
+        "name": "Address",
+        "type": "list",
+        "category": "addresses"
+    }, {
+        "name": "Change Password",
+        "type": "info",
+        "category": "password"
+    }]
+    app.handleResponse = function(e) {
+        app.userId = e.detail.response.result.id;
+    //     var request = {
+    //         "Sections": [
+    //             "address"
+    //         ],
+    //         "User": {
+    //             "id": 3241523,
+    //             "addresses": [{
+    //                 "addressLine1": "EON",
+    //                 "addressLine2": "Kharadi",
+    //                 "type": "Standard",
+    //                 "country": "US",
+    //                 "state": "AL",
+    //                 "city": "Montogomery",
+    //                 "zip": "36114",
+    //                 "phoneNumber": "1234567890"
+    //                 },{
+    //                 "addressLine1": "EON2",
+    //                 "addressLine2": "Kharadi2",
+    //                 "type": "Standard",
+    //                 "country": "US",
+    //                 "state": "AL",
+    //                 "city": "Montogomery",
+    //                 "zip": "36114",
+    //                 "phoneNumber": "1234567890"
+    //                 },{
+    //                 "addressLine1": "EON3",
+    //                 "addressLine2": "Kharadi3",
+    //                 "type": "Standard",
+    //                 "country": "US",
+    //                 "state": "AL",
+    //                 "city": "Montogomery",
+    //                 "zip": "36114",
+    //                 "phoneNumber": "1234567890"
+    //                 }]
+    //         }
+    //     };
+    // app.$.updateAjax.body = JSON.stringify(request);
+        app.$.updateAjax.generateRequest();
+    };
+
+    app._setProfileData = function(e){
+        app.profileInfo = e.detail.response.result;
     }
-};
-app.navigationData = [{
-    "name": "Personal Info",
-    "type": "info",
-    "category": "passenger",
-    "param": "?id=0"
-}, {
-    "name": "Communication Details",
-    "type": "info",
-    "category": "communication"
-}, {
-    "name": "Passenger List/Other Travelers",
-    "type": "list",
-    "category": "passengers"
-}, {
-    "name": "Flight Membership",
-    "type": "list",
-    "category": "frequentFlyers"
-}, {
-    "name": "Address",
-    "type": "list",
-    "category": "addresses"
-}, {
-    "name": "Change Password",
-    "type": "info",
-    "category": "password"
-}]
+
+
+});
 </script>
 
 </html>
