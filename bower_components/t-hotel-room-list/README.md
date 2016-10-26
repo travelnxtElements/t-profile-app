@@ -1,1 +1,0 @@
-# t-hotel-room-list
