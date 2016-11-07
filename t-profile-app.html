@@ -170,7 +170,7 @@ Example:
         
         <iron-pages role="main" selected="{{page}}" attr-for-selected="name" selected-attribute="visible">
             <!-- [] -->
-            
+            <!-- This is the home page of the app *Note we didnt create a components for this. -->
             <div 
               id="home" 
               name="home" 
@@ -184,6 +184,7 @@ Example:
                   </a>
               </template>
             </div>
+            <!-- All the list pages of the app -->
             <t-profile-list-page
               id="list"
               name="list"
@@ -191,6 +192,7 @@ Example:
               format-data="[[listFormat]]"
               input="[[listData]]">
             </t-profile-list-page>
+            <!-- All the forms of the app -->
             <t-profile-info-page
               id="info"
               name="info"
@@ -220,6 +222,7 @@ Example:
                     //this the object to give all data to populate header and format of the list
                     listFormats:Object,
 
+                    // Populate the home navigation with this property
                     navigationData:Array,
 
                     visible: {
@@ -260,6 +263,7 @@ Example:
 
                 observers: [
                     '__routePageChanged(route.path)',
+                    '_setDataToPages(profileInfo)'
                     //'__paxMappingChanged(searchCriteria.adultCount, searchCriteria.childCount)'
                 ],
 
@@ -275,18 +279,29 @@ Example:
                         }
 
                         this.page = this.routeData.page || 'home';
-                       // this._setHeaderDataEvent(this.page);
-                        if(this.routeData.page == 'list'){
-                          var listType = this.subroute.path.replace(/\//g, '');
-                          this.listFormat = this.listFormats[listType];
-                          this.listData = this.profileInfo[listType];
-                        }
-
+                       
+                        this._setDataToPages();
                     }.bind(this), 10);
                 },
+
+                _setDataToPages: function(info){
+                    // this._setHeaderDataEvent(this.page);
+                    if(!this.profileInfo){
+                        return;
+                    }
+                    var type = this.subroute.path.replace(/\//g, '');
+                    if(this.routeData.page == 'list'){
+                      this.listFormat = this.listFormats[type];
+                      this.listData = this.profileInfo[type];
+                    }else if(this.routeData.page == 'info'){
+                      this.infoFormat = this.infoFormats[type];
+                      this.infoData = this.profileInfo[type];
+                    }
+                },
+
                 //new list item
                 _newListItemAdded: function(){
-                  //this.route('route.path', 'info/'+ this.subroute.path.replace(/\//g, '') + '?id=new');
+
                 },
 
                 _clickedOnDelete: function (e) {
@@ -295,14 +310,7 @@ Example:
                 },
 
                 _clickedOnEdit: function (e) {
-                    // console.log(e);
-
-                    // this.set('route.path', 'info/'+ this.subroute.path.replace(/\//g, '') + '?id=' + e.detail.id);
-
-                    // this.info.someProperty = this.subroute.path.replace(/\//g, '');
-                    // if(i have a param){
-                    //   this.info.data = e.detail(or some translated object);
-                    // }
+                   
                 },
 
 

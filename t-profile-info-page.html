@@ -8,13 +8,32 @@
             :host {
                 display: block;
             }
+            #savePassengers {
+                display: block;
+            }
+            .section-small {
+                padding-top: 0;
+            }
         </style>
         <t-header
             normal-heading
             url="[[siteUrl]]home"
-            label="Ssasa"></t-header>
+            label="[[_getHeader(formatData)]]">
             
-
+        </t-header>
+        <div id="body" class="margin-bottom">
+            
+        </div>
+        <div class="section-small">
+            <t-button 
+                id="savePassengers"
+                class="primary" 
+                on-tap="_savePassengerData" 
+                type="button" 
+                label="Save">               
+            </t-button>
+        </div>
+        
     </template>    
     <script>
         (function () {
@@ -23,10 +42,58 @@
                 
                 properties: {
 
+                    input: {
+                        type: Object,
+                        observer: '_createElement'
+                    }
+
                 },
 
                 _getHeader: function(formatData){
                     return formatData.header || 'Info';
+                },
+
+                _createElement: function(){
+                    this.$.body.innerHTML = "";
+                    var ele = document.createElement(this.formatData.component),
+                    obj = this.formatData.setProperties,
+                    input = this.input;
+
+                    ele.id = 'content'; 
+                    Object.keys(obj).forEach(function(key) {
+                        if(obj[key]['value']){
+                            ele.set(key , obj[key]['value']);
+                        }else if(obj[key]['key']){
+                            var props = obj[key]['key'].split('.'),
+                            tempItem = input;
+                            for (var ii = 0; ii < props.length; ii++) {
+                                tempItem=tempItem[props[ii]];
+                            }
+                            ele.set(key , tempItem);
+                        }
+                        // Object.keys(obj[key]).forEach(function(key2) {
+                        //     console.log(key2, obj[key][key2]);
+                        // });
+                    });
+
+                    Polymer.dom(this.$.body).appendChild(ele);
+                },
+
+                _savePassengerData: function(){
+                    var items = this.querySelectorAll('[required]');
+                    console.log(items);
+                    var items = Polymer.dom(this.$$('#content')).getDistributedNodes('[required]');
+                    console.log(items);
+                },
+
+                setLoad: function(val){
+                    if(val){
+                        this.$.savePassengers.disabled = true;
+                        this.$.savePassengers.label = "SAVING...";
+                    }else{
+                        this.$.savePassengers.disabled = false;
+                        this.$.savePassengers.label = "SAVE";
+                    }
                 }
 
             });        

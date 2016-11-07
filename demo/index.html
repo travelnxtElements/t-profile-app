@@ -10,6 +10,8 @@
     <link rel="import" href="../../t-mystique-auth/t-mystique-auth.html">
     <link rel="import" href="../../iron-ajax/iron-ajax.html">
     <link rel="import" href="../../t-sign-in/t-sign-in.html">
+    <link rel="import" href="../../t-passenger-info/t-communication.html">
+    <link rel="import" href="../../t-passenger-info/t-passenger-segment.html">
     <link rel="import" href="../../t-sign-in/t-sign-in-api.html">
     <style>
     body {
@@ -34,7 +36,7 @@
         <iron-ajax id="updateAjax" url="{{apiBaseUrl}}api/User/get/[[userId]]?token={{tokenResponse.authenticationToken}}" handle-as="json" on-response="_setProfileData"></iron-ajax>
 
         <template is="dom-if" if="[[signedIn]]">
-            <t-profile-app navigation-data="[[navigationData]]" profile-info="[[profileInfo]]" list-formats="[[listFormats]]" visible route="[[route]]" site-url="#/"></t-profile-app>
+            <t-profile-app navigation-data="[[navigationData]]" profile-info="[[profileInfo]]" list-formats="[[listFormats]]" info-formats="[[infoFormats]]" visible route="[[route]]" site-url="#/"></t-profile-app>
         </template>
     </template>
 </body>
@@ -72,16 +74,66 @@ window.addEventListener('WebComponentsReady', function(e) {
         }
     };
     //this is based on all the possible info routes
-    app.infoFormats = {}
+    app.infoFormats = {
+        "fellowTravellers":{
+            "header":"Passenger",
+            "component":"t-passenger-segment",
+            "setProperties":{
+                "title":{"key":"personalDetails.name.title"},
+                "firstName":{"key":"personalDetails.name.firstName"},
+                "middleName":{"key":"personalDetails.name.middleName"},
+                "lastName":{"key":"personalDetails.name.lastName"},
+                "suffix":{"key":"personalDetails.name.suffix"},
+                "hideGender":{"value":true},
+                "dateOfBirth": {"key":"personalDetails.dateOfBirth.date"}
+            },
+            "getProperties":["title","firstName","lastName","suffix","dateOfBirth","gender"],
+            "isValid":{
+                "type":"method",
+                "name": "validate",
+                "value": true
+            }
+        },
+        "contacts": {
+            "header": "Communication",
+            "component": "t-communication",
+            "setProperties":{
+                "hideSectionHeader":{"value":true},
+                "email":{"key":"emails.0.value"},
+                "phone":{"key":"phones.0.value"}
+            },
+            "getProperties":["email","phone"],
+            "isValid":{
+                "type": "property",
+                "name": "invalid",
+                "value":false
+            }
+        },
+        "basicInfo":{
+            "header":"Personal Info",
+            "component":"t-passenger-segment",
+            "setProperties":{
+                "title":{"key":"name.title"},
+                "type":{"value":"all"},
+                "firstName":{"key":"name.firstName"},
+                "middleName":{"key":"name.middleName"},
+                "lastName":{"key":"name.lastName"},
+                "suffix":{"key":"name.suffix"},
+                "hideGender":{"value":true},
+                "dateOfBirth": {"key":"dateOfBirth.date"}
+            },
+            "getProperties":["title","firstName","lastName","suffix","dateOfBirth","gender"]
+        }
+    };
+
     app.navigationData = [{
         "name": "Personal Info",
         "type": "info",
-        "category": "passenger",
-        "param": "?id=0"
+        "category": "basicInfo"
     }, {
         "name": "Communication Details",
         "type": "info",
-        "category": "communication"
+        "category": "contacts"
     }, {
         "name": "Passenger List/Other Travelers",
         "type": "list",
@@ -98,52 +150,15 @@ window.addEventListener('WebComponentsReady', function(e) {
         "name": "Change Password",
         "type": "info",
         "category": "password"
-    }]
+    }];
     app.handleResponse = function(e) {
         app.userId = e.detail.response.result.id;
-    //     var request = {
-    //         "Sections": [
-    //             "address"
-    //         ],
-    //         "User": {
-    //             "id": 3241523,
-    //             "addresses": [{
-    //                 "addressLine1": "EON",
-    //                 "addressLine2": "Kharadi",
-    //                 "type": "Standard",
-    //                 "country": "US",
-    //                 "state": "AL",
-    //                 "city": "Montogomery",
-    //                 "zip": "36114",
-    //                 "phoneNumber": "1234567890"
-    //                 },{
-    //                 "addressLine1": "EON2",
-    //                 "addressLine2": "Kharadi2",
-    //                 "type": "Standard",
-    //                 "country": "US",
-    //                 "state": "AL",
-    //                 "city": "Montogomery",
-    //                 "zip": "36114",
-    //                 "phoneNumber": "1234567890"
-    //                 },{
-    //                 "addressLine1": "EON3",
-    //                 "addressLine2": "Kharadi3",
-    //                 "type": "Standard",
-    //                 "country": "US",
-    //                 "state": "AL",
-    //                 "city": "Montogomery",
-    //                 "zip": "36114",
-    //                 "phoneNumber": "1234567890"
-    //                 }]
-    //         }
-    //     };
-    // app.$.updateAjax.body = JSON.stringify(request);
         app.$.updateAjax.generateRequest();
     };
 
     app._setProfileData = function(e){
         app.profileInfo = e.detail.response.result;
-    }
+    };
 
 
 });
