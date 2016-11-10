@@ -31,6 +31,7 @@
         <t-sign-in id="loginView" username="{{userName}}" hidden$="[[signedIn]]"></t-sign-in>
         <t-sign-in-api id="loginApi" loading={{loading}} api-base-url="[[apiBaseUrl]]" api-relative-url="api/authentication/authenticate/user" auth-token="{{tokenResponse.authenticationToken}}"></t-sign-in-api> 
       
+                <!-- profile-info="{{profileInfo.result}}" -->
         
 
             <t-mystique-profile 

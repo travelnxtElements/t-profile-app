@@ -31,10 +31,16 @@
             .item {
                 min-width: 50px;
             }
+            .item:focus:after{
+                display: none;
+            }
+            .item.iron-selected{
+                font-weight: normal;
+            }
         </style>
 
         <div class="layout horizontal section-small font-12">
-            <div class="flex label font-12">
+            <div class="flex label font-16">
                 [[label]]
             </div>
           <paper-menu-button class="button secondary-text" horizontal-offset="-50" vertical-offset="20">

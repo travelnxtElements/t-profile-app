@@ -274,7 +274,7 @@ Example:
 
                 observers: [
                     '__routePageChanged(route.path)',
-                    '_setDataToPages(profileInfo)'
+                    '_setDataToPages(profileInfo,infoFormats,listFormats)'
                     //'__paxMappingChanged(searchCriteria.adultCount, searchCriteria.childCount)'
                 ],
 
@@ -290,27 +290,27 @@ Example:
 
                         this.page = this.routeData.page || 'home';
                        
-                        this._setDataToPages();
+                        this._setDataToPages(this.profileInfo,this.infoFormats, this.listFormats);
                 },
 
-                _setDataToPages: function(info){
+                _setDataToPages: function(profileInfo,infoFormats,listFormats){
                     // this._setHeaderDataEvent(this.page);
-                    if(!this.profileInfo || !this.subroute.path){
+                    if(!profileInfo || !this.subroute.path || !infoFormats || !listFormats){
                         return;
                     }
                     this.subRouteType = this.subroute.path.replace(/\//g, '');
                     if(this.routeData.page == 'list'){
-                      this.listFormat = this.listFormats[this.subRouteType];
-                      this.listData = this.profileInfo[this.subRouteType];
+                      this.listFormat = listFormats[this.subRouteType];
+                      this.listData = profileInfo[this.subRouteType];
                     }else if(this.routeData.page == 'info'){
-                      this.infoFormat = this.infoFormats[this.subRouteType];
+                      this.infoFormat = infoFormats[this.subRouteType];
                       try{
                           if(this.queryParams.id >=0){
-                                this.infoData = this.profileInfo[this.subRouteType][this.queryParams.id];
+                                this.infoData = profileInfo[this.subRouteType][this.queryParams.id];
                           }else if(this.queryParams.id == -1){
                                 this.infoData = null;
                           }else{
-                                this.infoData = this.profileInfo[this.subRouteType];
+                                this.infoData = profileInfo[this.subRouteType];
                           }
 
                       }catch(e){

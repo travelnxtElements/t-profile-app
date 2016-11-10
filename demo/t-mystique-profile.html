@@ -1,6 +1,6 @@
 
     <link rel="import" href="../../t-passenger-info/t-communication.html">
-    <link rel="import" href="../../t-passenger-info/t-passenger-segment.html">
+    <link rel="import" href="../../t-profile-personalInfo/t-profile-personal-info.html">
 
     <link rel="import" href="../../t-address/t-address.html">
     <link rel="import" href="../../t-profile-change-password/t-profile-change-password.html">
@@ -30,6 +30,10 @@ Example:
         :host {
             display: block;
         }
+        ::content t-address{
+        	padding: var(--normal-spacing, 10px);
+
+        }
         </style>
         <app-route
             id="route"
@@ -39,14 +43,23 @@ Example:
             data="{{routeData}}"
             tail="{{subroute}}">
         </app-route>
-        <iron-ajax id="ajax" url="{{apiBaseUrl}}api/User/get?token={{authToken}}" handle-as="json" on-response="_handleResponse">
+        <iron-ajax id="ajax" url="[[apiBaseUrl]]api/User/get?token={{authToken}}" handle-as="json" on-response="_handleResponse">
         </iron-ajax>
 
-        <iron-ajax id="updateAjax" url="{{apiBaseUrl}}api/User/get/[[userId]]?token={{authToken}}" handle-as="json" on-response="_setProfileData">
+        <iron-ajax id="updateAjax" url="[[apiBaseUrl]]api/User/get/[[userId]]?token={{authToken}}" handle-as="json" on-response="_setProfileData">
         </iron-ajax>
 
         <iron-ajax id="countryCall" url="[[countryApi]]?token=[[authToken]]" method="GET" verbose headers='{"accept": "application/json"}' handle-as="json" content-type="application/json" last-response="{{countries}}">
         </iron-ajax>
+    <iron-ajax
+        id="membershipCall"
+        url="[[apiBaseUrl]]api/Flight/loyaltyprograms?token=[[authToken]]"
+        handle-as="json"
+        content-type="application/json"
+        method="POST"
+        on-response="setProgramNames"
+        >
+     </iron-ajax>
 
         <t-profile-app navigation-data="[[navigationData]]" profile-info="[[profileInfo]]" list-formats="[[listFormats]]" info-formats="[[infoFormats]]" visible="[[visible]]" route="{{route}}" query-params="{{queryParams}}" site-url="[[siteUrl]]">
         </t-profile-app>
@@ -56,6 +69,23 @@ Example:
         is: 't-mystique-profile',
 
         properties: {
+
+        	countryApi:{
+        		type:String,
+        		value:""
+        	},
+        	baseGeoApi:{
+        		type:String,
+        		value:""
+        	},
+        	countries:{
+        		type:Array,
+        		value:[]
+        	},
+        	// authToken:{
+        	// 	type:String,
+        	// 	value:""
+        	// },
 
 
             visible: {
@@ -99,7 +129,7 @@ Example:
 
             infoFormats: {
                 type: Object,
-                computed:'_concludeInfoFormats(countryApi,baseGeoApi,countries,authToken)' 
+                computed:'_concludeInfoFormats(countryApi,baseGeoApi,countries,programsArray)' 
             },
 
             navigationData: {
@@ -138,8 +168,23 @@ Example:
             '_populateCountry(authToken)'
         ],
         
-        _concludeInfoFormats: function(countryApi,baseGeoApi,countries,authToken){
+        _concludeInfoFormats: function(countryApi,baseGeoApi,countries,programsArray){
                 	return {
+                		"memberships": {
+                			"header": "Memberships",
+                			"component": "t-profile-membership",
+                			"setProperties": {
+	                            "programNames": {
+	                                "value": programsArray
+	                            }
+	                        },
+                			"getProperties": ["selectedProgram", "programNumber"],
+	                        "isValid": {
+	                            "type": "method",
+	                            "name": "validate",
+	                            "value": true
+	                        }
+                		},
                 		"password": {
                 			"header": "Change Password",
                 			"component": "t-profile-change-password",
@@ -152,7 +197,7 @@ Example:
                 		},
 	                    "fellowTravellers": {
 	                        "header": "Passenger",
-	                        "component": "t-passenger-segment",
+	                        "component": "t-profile-personal-info",
 	                        "setProperties": {
 	                            "type": {
 	                                "value": "all"
@@ -179,7 +224,7 @@ Example:
 	                                "key": "personalDetails.dateOfBirth.date"
 	                            }
 	                        },
-	                        "getProperties": ["title", "firstName", "lastName", "suffix", "dateOfBirth", "gender"],
+	                        "getProperties": ["title", "firstName", "lastName", "suffix", "dateOfBirth", "gender","redressNumber"],
 	                        "isValid": {
 	                            "type": "method",
 	                            "name": "validate",
@@ -192,7 +237,7 @@ Example:
 	                        "setProperties": {
 
 	                        	"queryParams":{
-	                        		"value": '?token=' + authToken
+	                        		"value": '?token=' + this.authToken
 	                        	},
 
 	                        	"countryApi": {
@@ -261,7 +306,7 @@ Example:
 	                    },
 	                    "basicInfo": {
 	                        "header": "Personal Info",
-	                        "component": "t-passenger-segment",
+	                        "component": "t-profile-personal-info",
 	                        "setProperties": {
 	                            "title": {
 	                                "key": "name.title"
@@ -288,7 +333,7 @@ Example:
 	                                "key": "dateOfBirth.date"
 	                            }
 	                        },
-	                        "getProperties": ["title", "firstName", "lastName", "suffix", "dateOfBirth", "gender"],
+	                        "getProperties": ["title", "firstName", "lastName", "suffix", "dateOfBirth", "gender","redressNumber"],
 	                        "isValid": {
 	                            "type": "method",
 	                            "name": "validate",
@@ -298,8 +343,30 @@ Example:
 	                }
 	     },
 
-        _populateCountry: function(){
-            this.$.countryCall.generateRequest();
+		setProgramNames:function(e){
+            
+            programs=e.detail.response.result;
+
+            if(!programs) {
+                return [];
+            }
+
+            this.programsArray =  programs.map(function(pgm) {
+                    return pgm.lstOfMembershipProvider.map(function(m) { 
+                        var label = m.code + ' - ' + pgm.name;
+                        return { programName: pgm.name, airlineCode: m.code, label: label};
+                    });
+                })
+                .reduce(function(arr, a) {
+                    return arr.concat(a);
+                }, []);
+        },
+                        
+        _populateCountry: function(authToken){
+        	this.$.membershipCall.body='["UA"]';
+        	this.$.membershipCall.generateRequest();
+
+        	this.$.countryCall.generateRequest();
         },
 
         _handleResponse: function(e) {

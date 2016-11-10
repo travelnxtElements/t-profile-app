@@ -88,6 +88,7 @@
                 if (validate && !this._validate(ele,validate,validValue)){
                     return;
                 }
+                this.setLoad(true);
                 if (props.length) {
                     //setting the object from get Properties array mentioned in infoFormats    
                     props.forEach(function(val, index) {
