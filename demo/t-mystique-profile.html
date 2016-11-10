@@ -1,0 +1,319 @@
+
+    <link rel="import" href="../../t-passenger-info/t-communication.html">
+    <link rel="import" href="../../t-passenger-info/t-passenger-segment.html">
+
+    <link rel="import" href="../../t-address/t-address.html">
+    <link rel="import" href="../../t-profile-change-password/t-profile-change-password.html">
+    <link rel="import" href="../../t-profile-membership/t-profile-membership.html">
+<!--
+This is a mystique response based component.
+
+Example:
+
+            <t-mystique-profile 
+                id="mystique"
+                user-name="[[userName]]"
+                auth-token="{{tokenResponse.authenticationToken}}" 
+                api-base-url="[[apiBaseUrl]]"
+                visible 
+                profile-info="{{profileInfo.result}}"
+                route="{{route}}" 
+                query-params="{{queryParams}}" 
+                site-url="#/">
+            </t-mystique-profile>
+
+@demo demo/index.html
+-->
+<dom-module id="t-mystique-profile">
+    <template>
+        <style>
+        :host {
+            display: block;
+        }
+        </style>
+        <app-route
+            id="route"
+            route="{{route}}" 
+            pattern="/:page" 
+            query-params="{{queryParams}}"
+            data="{{routeData}}"
+            tail="{{subroute}}">
+        </app-route>
+        <iron-ajax id="ajax" url="{{apiBaseUrl}}api/User/get?token={{authToken}}" handle-as="json" on-response="_handleResponse">
+        </iron-ajax>
+
+        <iron-ajax id="updateAjax" url="{{apiBaseUrl}}api/User/get/[[userId]]?token={{authToken}}" handle-as="json" on-response="_setProfileData">
+        </iron-ajax>
+
+        <iron-ajax id="countryCall" url="[[countryApi]]?token=[[authToken]]" method="GET" verbose headers='{"accept": "application/json"}' handle-as="json" content-type="application/json" last-response="{{countries}}">
+        </iron-ajax>
+
+        <t-profile-app navigation-data="[[navigationData]]" profile-info="[[profileInfo]]" list-formats="[[listFormats]]" info-formats="[[infoFormats]]" visible="[[visible]]" route="{{route}}" query-params="{{queryParams}}" site-url="[[siteUrl]]">
+        </t-profile-app>
+    </template>
+    <script>
+    Polymer({
+        is: 't-mystique-profile',
+
+        properties: {
+
+
+            visible: {
+                type: Boolean,
+                value: false
+            },
+
+            queryParams:{
+            	type: Object,
+            	notify:true
+            },
+            //this is based on all the possible list routes
+
+            listFormats: {
+                type: Object,
+                value: {
+                    "fellowTravellers": {
+                        "header": "Travelers List",
+                        "format": ["personalDetails.name.title", "personalDetails.name.firstName", "personalDetails.name.lastName"]
+                    },
+                    "memberships": {
+                        "header": "Memberships",
+                        "format": ["productType", "providerName", "providerCode"]
+                    },
+                    "addresses": {
+                        "header": "Address List",
+                        "format": ["addressLine1", "addressLine2", "city", "state", "country"]
+                    }
+                }
+            },
+
+
+            //this is based on all the possible info routes
+            //the setProperties is mandatory to set the form fields on load.
+            //the getProperties is and array of strings. And is mandatory to fire an event upon save.
+            //the isValid object is to validate the form component, client side and if not given the form wont be validated and this will not impact on firing an event.
+            //the type property of isValid has two possible values 1. method 2. property with default as method.
+            // pass the name of the isValid property of the component and 
+
+            //also mention which value do we pass success with default as true.
+
+            infoFormats: {
+                type: Object,
+                computed:'_concludeInfoFormats(countryApi,baseGeoApi,countries,authToken)' 
+            },
+
+            navigationData: {
+                type: Array,
+                value: [{
+			        "name": "Personal Info",
+			        "type": "info",
+			        "category": "basicInfo"
+			    }, {
+			        "name": "Communication Details",
+			        "type": "info",
+			        "category": "contacts"
+			    }, {
+			        "name": "Passenger List/Other Travelers",
+			        "type": "list",
+			        "category": "fellowTravellers"
+			    }, {
+			        "name": "Flight Membership",
+			        "type": "list",
+			        "category": "memberships"
+			    }, {
+			        "name": "Address",
+			        "type": "list",
+			        "category": "addresses"
+			    }, {
+			        "name": "Change Password",
+			        "type": "info",
+			        "category": "password"
+			    }]
+			}
+        },
+
+
+        
+        observers:[
+            '_populateCountry(authToken)'
+        ],
+        
+        _concludeInfoFormats: function(countryApi,baseGeoApi,countries,authToken){
+                	return {
+                		"password": {
+                			"header": "Change Password",
+                			"component": "t-profile-change-password",
+                			"getProperties": ["newPassword", "currentPassword"],
+	                        "isValid": {
+	                            "type": "method",
+	                            "name": "validate",
+	                            "value": true
+	                        }
+                		},
+	                    "fellowTravellers": {
+	                        "header": "Passenger",
+	                        "component": "t-passenger-segment",
+	                        "setProperties": {
+	                            "type": {
+	                                "value": "all"
+	                            },
+	                            "title": {
+	                                "key": "personalDetails.name.title"
+	                            },
+	                            "firstName": {
+	                                "key": "personalDetails.name.firstName"
+	                            },
+	                            "middleName": {
+	                                "key": "personalDetails.name.middleName"
+	                            },
+	                            "lastName": {
+	                                "key": "personalDetails.name.lastName"
+	                            },
+	                            "suffix": {
+	                                "key": "personalDetails.name.suffix"
+	                            },
+	                            "hideGender": {
+	                                "value": true
+	                            },
+	                            "dateOfBirth": {
+	                                "key": "personalDetails.dateOfBirth.date"
+	                            }
+	                        },
+	                        "getProperties": ["title", "firstName", "lastName", "suffix", "dateOfBirth", "gender"],
+	                        "isValid": {
+	                            "type": "method",
+	                            "name": "validate",
+	                            "value": true
+	                        }
+	                    },
+	                    "addresses": {
+	                        "header": "Address",
+	                        "component": "t-address",
+	                        "setProperties": {
+
+	                        	"queryParams":{
+	                        		"value": '?token=' + authToken
+	                        	},
+
+	                        	"countryApi": {
+	                        		"value": countryApi
+	                        	},
+
+	                        	"baseGeoApi": {
+	                        		"value": baseGeoApi
+	                        	},
+
+	                            "preselectCountry": {
+	                                "key": "country"
+	                            },
+
+	                        	"countries": {
+	                        		"value": countries
+	                        	},
+	                        	
+	                            "hidePhoneNumber": {
+	                                "value": true
+	                            },
+	                            "line1": {
+	                                "key": "addressLine1"
+	                            },
+	                            "line2": {
+	                                "key": "addressLine2"
+	                            },
+	                            "city": {
+	                                "key": "city"
+	                            },
+
+	                            "zip": {
+	                                "key": "zip"
+	                            },
+	                            "preselectState": {
+	                                "key": "state"
+	                            }
+	           				},
+	                        "getProperties": ["line1","line2","city","country","state","zip"],
+	                        "isValid": {
+	                            "type": "method",
+	                            "name": "validate",
+	                            "value": true
+	                        }
+	                    },
+	                    "contacts": {
+	                        "header": "Communication",
+	                        "component": "t-communication",
+	                        "setProperties": {
+	                            "hideSectionHeader": {
+	                                "value": true
+	                            },
+	                            "email": {
+	                                "key": "emails.0.value"
+	                            },
+	                            "phone": {
+	                                "key": "phones.0.value"
+	                            }
+	                        },
+	                        "getProperties": ["email", "phone"],
+	                        "isValid": {
+	                            "type": "method",
+	                            "name": "validate",
+	                            "value": true
+	                        }
+	                    },
+	                    "basicInfo": {
+	                        "header": "Personal Info",
+	                        "component": "t-passenger-segment",
+	                        "setProperties": {
+	                            "title": {
+	                                "key": "name.title"
+	                            },
+	                            "type": {
+	                                "value": "all"
+	                            },
+	                            "firstName": {
+	                                "key": "name.firstName"
+	                            },
+	                            "middleName": {
+	                                "key": "name.middleName"
+	                            },
+	                            "lastName": {
+	                                "key": "name.lastName"
+	                            },
+	                            "suffix": {
+	                                "key": "name.suffix"
+	                            },
+	                            "hideGender": {
+	                                "value": true
+	                            },
+	                            "dateOfBirth": {
+	                                "key": "dateOfBirth.date"
+	                            }
+	                        },
+	                        "getProperties": ["title", "firstName", "lastName", "suffix", "dateOfBirth", "gender"],
+	                        "isValid": {
+	                            "type": "method",
+	                            "name": "validate",
+	                            "value": true
+	                        }
+	                    }
+	                }
+	     },
+
+        _populateCountry: function(){
+            this.$.countryCall.generateRequest();
+        },
+
+        _handleResponse: function(e) {
+	        this.userId = e.detail.response.result.id;
+	        this.$.updateAjax.generateRequest();
+	    },
+
+	    _setProfileData: function(e){
+	        this.profileInfo = e.detail.response.result;
+	    },
+
+	    generateRequest: function(){
+	    	this.$.ajax.generateRequest();
+	    }
+    });
+    </script>
+</dom-module>

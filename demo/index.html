@@ -10,9 +10,8 @@
     <link rel="import" href="../../t-mystique-auth/t-mystique-auth.html">
     <link rel="import" href="../../iron-ajax/iron-ajax.html">
     <link rel="import" href="../../t-sign-in/t-sign-in.html">
-    <link rel="import" href="../../t-passenger-info/t-communication.html">
-    <link rel="import" href="../../t-passenger-info/t-passenger-segment.html">
     <link rel="import" href="../../t-sign-in/t-sign-in-api.html">
+    <link rel="import" href="t-mystique-profile.html">
     <style>
     body {
         margin: 0;
@@ -24,20 +23,29 @@
 
 <body>
     <template is="dom-bind" id="app">
-        <app-location use-hash-as-path route="{{route}}"></app-location>
-        <app-route route="{{route}}">
+         <app-location use-hash-as-path route="{{route}}" query-params="{{queryParams}}"></app-location>
+        <app-route route="{{route}}" query-params="{{queryParams}}">
         </app-route>
         <t-mystique-auth name="mystiquedemo" url="[[apiBaseUrl]]api/authentication/authenticate/context" token-response="{{tokenResponse}}" auto>
         </t-mystique-auth>
         <t-sign-in id="loginView" username="{{userName}}" hidden$="[[signedIn]]"></t-sign-in>
-        <t-sign-in-api id="loginApi" loading={{loading}} api-base-url="[[apiBaseUrl]]" api-relative-url="api/authentication/authenticate/user" auth-token="{{tokenResponse.authenticationToken}}"></t-sign-in-api>
+        <t-sign-in-api id="loginApi" loading={{loading}} api-base-url="[[apiBaseUrl]]" api-relative-url="api/authentication/authenticate/user" auth-token="{{tokenResponse.authenticationToken}}"></t-sign-in-api> 
       
-        <iron-ajax id="ajax" url="{{apiBaseUrl}}api/User/get/username/[[userName]]?token={{tokenResponse.authenticationToken}}" handle-as="json" on-response="handleResponse"></iron-ajax>
-        <iron-ajax id="updateAjax" url="{{apiBaseUrl}}api/User/get/[[userId]]?token={{tokenResponse.authenticationToken}}" handle-as="json" on-response="_setProfileData"></iron-ajax>
+        
 
-        <template is="dom-if" if="[[signedIn]]">
-            <t-profile-app navigation-data="[[navigationData]]" profile-info="[[profileInfo]]" list-formats="[[listFormats]]" info-formats="[[infoFormats]]" visible route="[[route]]" site-url="#/"></t-profile-app>
-        </template>
+            <t-mystique-profile 
+                hidden$="[[!signedIn]]"
+                id="mystique"
+                user-name="[[userName]]"
+                auth-token="{{tokenResponse.authenticationToken}}" 
+                api-base-url="[[apiBaseUrl]]"
+                country-api="[[apiBaseUrl]]api/Content/countries"
+                base-geo-api="[[apiBaseUrl]]api/Content"
+                visible 
+                route="{{route}}" 
+                query-params="{{queryParams}}" 
+                site-url="#/">
+            </t-mystique-profile>
     </template>
 </body>
 <script>
@@ -46,6 +54,7 @@ app.apiBaseUrl = "http://demo.travelnxt.com/";
 
 window.addEventListener('WebComponentsReady', function(e) {
     var app = document.querySelector('#app');
+    var mystique = document.querySelector('#mystique');
     var loginView = document.querySelector('#loginView');
     var loginApi = document.querySelector('#loginApi');
 
@@ -54,113 +63,10 @@ window.addEventListener('WebComponentsReady', function(e) {
     loginApi.addEventListener('t-sign-in-api-success', function(e) {
         loginView.onAuthenticateSuccess.bind(loginView);
         app.signedIn = true;
-        app.$.ajax.generateRequest();
+        mystique.generateRequest();
     });
     loginApi.addEventListener('t-sign-in-api-error', loginView.onAuthenticateError.bind(loginView));
-
-    //this is based on all the possible list routes
-    app.listFormats = {
-        "fellowTravellers": {
-            "header": "Travelers List",
-            "format": ["personalDetails.name.title", "personalDetails.name.firstName", "personalDetails.name.lastName"]
-        },
-        "memberships": {
-            "header": "Memberships",
-            "format": ["productType","providerName","providerCode"]
-        },
-        "addresses": {
-            "header": "Address List",
-            "format": ["addressLine1", "addressLine2","city","state", "country"]
-        }
-    };
-    //this is based on all the possible info routes
-    app.infoFormats = {
-        "fellowTravellers":{
-            "header":"Passenger",
-            "component":"t-passenger-segment",
-            "setProperties":{
-                "title":{"key":"personalDetails.name.title"},
-                "firstName":{"key":"personalDetails.name.firstName"},
-                "middleName":{"key":"personalDetails.name.middleName"},
-                "lastName":{"key":"personalDetails.name.lastName"},
-                "suffix":{"key":"personalDetails.name.suffix"},
-                "hideGender":{"value":true},
-                "dateOfBirth": {"key":"personalDetails.dateOfBirth.date"}
-            },
-            "getProperties":["title","firstName","lastName","suffix","dateOfBirth","gender"],
-            "isValid":{
-                "type":"method",
-                "name": "validate",
-                "value": true
-            }
-        },
-        "contacts": {
-            "header": "Communication",
-            "component": "t-communication",
-            "setProperties":{
-                "hideSectionHeader":{"value":true},
-                "email":{"key":"emails.0.value"},
-                "phone":{"key":"phones.0.value"}
-            },
-            "getProperties":["email","phone"],
-            "isValid":{
-                "type": "property",
-                "name": "invalid",
-                "value":false
-            }
-        },
-        "basicInfo":{
-            "header":"Personal Info",
-            "component":"t-passenger-segment",
-            "setProperties":{
-                "title":{"key":"name.title"},
-                "type":{"value":"all"},
-                "firstName":{"key":"name.firstName"},
-                "middleName":{"key":"name.middleName"},
-                "lastName":{"key":"name.lastName"},
-                "suffix":{"key":"name.suffix"},
-                "hideGender":{"value":true},
-                "dateOfBirth": {"key":"dateOfBirth.date"}
-            },
-            "getProperties":["title","firstName","lastName","suffix","dateOfBirth","gender"]
-        }
-    };
-
-    app.navigationData = [{
-        "name": "Personal Info",
-        "type": "info",
-        "category": "basicInfo"
-    }, {
-        "name": "Communication Details",
-        "type": "info",
-        "category": "contacts"
-    }, {
-        "name": "Passenger List/Other Travelers",
-        "type": "list",
-        "category": "fellowTravellers"
-    }, {
-        "name": "Flight Membership",
-        "type": "list",
-        "category": "memberships"
-    }, {
-        "name": "Address",
-        "type": "list",
-        "category": "addresses"
-    }, {
-        "name": "Change Password",
-        "type": "info",
-        "category": "password"
-    }];
-    app.handleResponse = function(e) {
-        app.userId = e.detail.response.result.id;
-        app.$.updateAjax.generateRequest();
-    };
-
-    app._setProfileData = function(e){
-        app.profileInfo = e.detail.response.result;
-    };
-
-
+    // app.profileInfo = {"result":{"id":3241523,"basicInfo":{"userName":"spal@tavisca.com","name":{"title":"Mr","firstName":"Sounak","middleName":null,"lastName":"Pal","suffix":null,"prefix":null},"dateOfBirth":{"date":"Thu, 21 Jul, 2005","time":"12:00 AM","systemDateTime":"2005-07-21T00:00:00"},"role":"Traveller","gender":"Male","profileImage":null,"redressInfo":null,"origin":"Email","createdDate":{"date":"Thu, 21 Jul, 2016","time":"9:32 PM","systemDateTime":"2016-07-21T21:32:24.89"},"roles":["Traveller"]},"addresses":[{"id":"1","locationType":"Home","addressScheme":null,"addressLine1":"EON","addressLine2":"Kharadi","city":"Montogomery","state":"AL","country":"US","zip":"36114"},{"id":"2","locationType":"Home","addressScheme":null,"addressLine1":"EON2","addressLine2":"Kharadi2","city":"Montogomery","state":"AL","country":"US","zip":"36114"},{"id":"3","locationType":"Home","addressScheme":null,"addressLine1":"EON3","addressLine2":"Kharadi3","city":"Montogomery","state":"AL","country":"US","zip":"36114"}],"contacts":{"phones":[{"id":"2","value":"1919919191","locationType":"Office"},{"id":"3","value":"111111111","locationType":"Office"}],"emails":[{"id":"1","value":"spal@tavisca.com","isPrimary":true}]},"fellowTravellers":[{"id":"1","personalDetails":{"name":{"title":"Mr","firstName":"Some","middleName":"","lastName":"Namesa","suffix":"","prefix":null},"dateOfBirth":{"date":"Wed, 02 Feb, 2000","time":"4:22 PM","systemDateTime":"2000-02-02T16:22:00Z"},"gender":"Male","email":"so@ms.com","phone":"9199191919"},"passport":{"id":null,"passportNumber":null,"issuingCountry":null,"name":null,"issueDate":null,"expiryDate":null,"nationalityCountry":null},"memberships":[]},{"id":"2","personalDetails":{"name":{"title":"Mr","firstName":"Somsasa","middleName":"","lastName":"sasasa","suffix":"mskm","prefix":null},"dateOfBirth":{"date":"Wed, 10 May, 2006","time":"4:26 PM","systemDateTime":"2006-05-10T16:26:00Z"},"gender":"Male","email":"assa@sasa.csa","phone":"9199191919"},"passport":{"id":null,"passportNumber":null,"issuingCountry":null,"name":null,"issueDate":null,"expiryDate":null,"nationalityCountry":null},"memberships":[]}],"passports":[{"id":"1","passportNumber":"J15424","issuingCountry":"IN","name":{"title":null,"firstName":"Sounak Pal","middleName":null,"lastName":null,"suffix":null,"prefix":null},"issueDate":null,"expiryDate":{"date":"Thu, 16 Aug, 2018","time":"11:13 AM","systemDateTime":"2018-08-16T11:13:00-04:00"},"nationalityCountry":null}],"memberships":[{"id":"1","code":"12312","productType":"Flight","type":"","providerName":"Sun Country","providerCode":"SY"},{"id":"3","code":"199191919","productType":"Flight","type":"","providerName":"Jet Airways","providerCode":"9W"},{"id":"4","code":"123123","productType":"Car","type":"promotional","providerName":"CarTrawler","providerCode":"CW"},{"id":"5","code":"123121","productType":"Car","type":"corporate","providerName":"CarTrawler","providerCode":"CW"},{"id":"6","code":"111111","productType":"Car","type":"promotional","providerName":"Advantage","providerCode":"AD"},{"id":"7","code":"111111","productType":"Car","type":"corporate","providerName":"Advantage","providerCode":"AD"}],"userIdentity":{"secretQuestion":"What is your childhood nickname"},"referralInfo":null,"wallet":null,"referralCode":"spal@tavisca$com","additionalData":[]},"status":{"isSuccessful":true,"code":200,"message":"Successful","referenceId":"e882d84e-eace-4d63-bfcf-d159e8a29e8a","additionalMessages":[]}}
 });
 </script>
 

@@ -128,7 +128,10 @@
     "paper-toast": "PolymerElements/paper-toast#^1.2.0",
     "t-points-payment": "travelnxtElements/t-points-payment#^1.0.0",
     "t-password-input": "atomelements/t-password-input#^1.0.0",
-    "juicy-html": "Juicy/juicy-html#^1.0.2"
+    "juicy-html": "Juicy/juicy-html#^1.0.2",
+    "t-profile-membership": "travelnxtElements/t-profile-membership",
+    "t-profile-personalInfo": "travelnxtElements/t-profile-personalInfo",
+    "t-profile-change-password": "travelnxtElements/t-profile-change-password"
   },
   "devDependencies": {
     "webcomponentsjs": "~0.7.14",

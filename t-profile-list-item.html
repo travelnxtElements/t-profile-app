@@ -73,7 +73,7 @@
 
                 _click: function(e){
                     console.log(e);
-                    this.fire(e.srcElement.getAttribute('type') + '-click', this.data);
+                    this.fire(e.srcElement.getAttribute('type') + '-click', {id: this.index});
                 }
             });        
         })();

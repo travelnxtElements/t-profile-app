@@ -164,6 +164,7 @@ Example:
             id="route"
             route="{{route}}" 
             pattern="/:page" 
+            query-params="{{queryParams}}"
             data="{{routeData}}"
             tail="{{subroute}}">
         </app-route>
@@ -222,8 +223,16 @@ Example:
                     //this the object to give all data to populate header and format of the list
                     listFormats:Object,
 
+                    //formats for all forms created in Info page
+                    infoFormats: Object,
+
                     // Populate the home navigation with this property
                     navigationData:Array,
+
+                    queryParams:{
+                        type: Object,
+                        notify:true
+                    },
 
                     visible: {
                         type: Boolean,
@@ -258,7 +267,9 @@ Example:
                 listeners: {
                     'added-new': '_newListItemAdded',
                     'edit-click': '_clickedOnEdit',
-                    'delete-click': '_clickedOnDelete'
+                    'delete-click': '_clickedOnDelete',
+                    'info-submit': '_fireSaveEvent'
+
                 },
 
                 observers: [
@@ -268,7 +279,6 @@ Example:
                 ],
 
                 __routePageChanged: function (path) {
-                    setTimeout(function () {
                         if (!this.visible || path === undefined || path === null) {
                             return;
                         }
@@ -281,27 +291,55 @@ Example:
                         this.page = this.routeData.page || 'home';
                        
                         this._setDataToPages();
-                    }.bind(this), 10);
                 },
 
                 _setDataToPages: function(info){
                     // this._setHeaderDataEvent(this.page);
-                    if(!this.profileInfo){
+                    if(!this.profileInfo || !this.subroute.path){
                         return;
                     }
-                    var type = this.subroute.path.replace(/\//g, '');
+                    this.subRouteType = this.subroute.path.replace(/\//g, '');
                     if(this.routeData.page == 'list'){
-                      this.listFormat = this.listFormats[type];
-                      this.listData = this.profileInfo[type];
+                      this.listFormat = this.listFormats[this.subRouteType];
+                      this.listData = this.profileInfo[this.subRouteType];
                     }else if(this.routeData.page == 'info'){
-                      this.infoFormat = this.infoFormats[type];
-                      this.infoData = this.profileInfo[type];
+                      this.infoFormat = this.infoFormats[this.subRouteType];
+                      try{
+                          if(this.queryParams.id >=0){
+                                this.infoData = this.profileInfo[this.subRouteType][this.queryParams.id];
+                          }else if(this.queryParams.id == -1){
+                                this.infoData = null;
+                          }else{
+                                this.infoData = this.profileInfo[this.subRouteType];
+                          }
+
+                      }catch(e){
+                        console.log(e);
+                      }
+                    }else{
+                        //considering this is homepage route.
+                        setTimeout(function(){
+                            this.queryParams ={};
+                        }.bind(this),10)
                     }
+
+                    this.$.info.createElement();
+                },
+
+                _fireSaveEvent: function(e){
+                    var object = {};
+                    object.type = this.subRouteType;
+                    object.data = e.detail;
+                    if(this.queryParams && this.queryParams.id){
+                        object.id = this.queryParams.id;
+                    }
+                    this.fire('profile-saved',object);
                 },
 
                 //new list item
                 _newListItemAdded: function(){
-
+                    this.set('queryParams',{id:-1});
+                    this.set('route.path','/info/'+ this.subRouteType);
                 },
 
                 _clickedOnDelete: function (e) {
@@ -310,12 +348,17 @@ Example:
                 },
 
                 _clickedOnEdit: function (e) {
-                   
+                    this.set('queryParams',{id: JSON.stringify(e.detail.id)});
+                    this.set('route.path','/info/'+ this.subRouteType);
                 },
 
 
                 _goToFailurePage: function (e) {
                     this.set('route.path', 'failure');
+                },
+
+                routeToHome: function(){
+                    this.set('route.path','/home');
                 }
             });
         })();

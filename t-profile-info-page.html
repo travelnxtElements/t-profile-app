@@ -1,102 +1,132 @@
 <link rel="import" href="../polymer/polymer.html" />
-
 <link rel="import" href="../t-text-container/travel-element-styles.html">
 <dom-module id="t-profile-info-page">
-<!-- The info page will handle all the forms according to the request.... -->
+    <!-- The info page will handle all the forms according to the request.... -->
     <template>
         <style include="travel-element-styles">
-            :host {
-                display: block;
-            }
-            #savePassengers {
-                display: block;
-            }
-            .section-small {
-                padding-top: 0;
-            }
+        :host {
+            display: block;
+        }
+        
+        #savePassengers {
+            display: block;
+        }
+        
+        .section-small {
+            padding-top: 0;
+        }
         </style>
-        <t-header
-            normal-heading
-            url="[[siteUrl]]home"
-            label="[[_getHeader(formatData)]]">
-            
+        <t-header normal-heading url="[[siteUrl]]home" label="[[_getHeader(formatData)]]">
         </t-header>
         <div id="body" class="margin-bottom">
-            
         </div>
         <div class="section-small">
-            <t-button 
-                id="savePassengers"
-                class="primary" 
-                on-tap="_savePassengerData" 
-                type="button" 
-                label="Save">               
+            <t-button id="savePassengers" class="primary" on-tap="_savePassengerData" type="button" label="Save">
             </t-button>
         </div>
-        
-    </template>    
+    </template>
     <script>
-        (function () {
-            Polymer({
-                is: 't-profile-info-page',
-                
-                properties: {
+    (function() {
+        Polymer({
+            is: 't-profile-info-page',
 
-                    input: {
-                        type: Object,
-                        observer: '_createElement'
-                    }
+            properties: {
 
-                },
+                input: Object,
 
-                _getHeader: function(formatData){
-                    return formatData.header || 'Info';
-                },
+                formatData: Object,
 
-                _createElement: function(){
-                    this.$.body.innerHTML = "";
-                    var ele = document.createElement(this.formatData.component),
+                visible: {
+                    type: Boolean,
+                    value: false,
+                    notify:true
+                }
+
+            },
+
+            _getHeader: function(formatData) {
+                return formatData.header || 'Info';
+            },
+
+            createElement: function() {
+                if(!this.visible){
+                    return;
+                }
+                this.$.body.innerHTML = "";
+                var ele = document.createElement(this.formatData.component),
                     obj = this.formatData.setProperties,
                     input = this.input;
 
-                    ele.id = 'content'; 
+                ele.id = 'content';
+                if(obj && Object.keys(obj).length > 0 ){
                     Object.keys(obj).forEach(function(key) {
-                        if(obj[key]['value']){
-                            ele.set(key , obj[key]['value']);
-                        }else if(obj[key]['key']){
+                        if (obj[key]['value']) {
+                            ele.set(key, obj[key]['value']);
+                        } else if ( obj[key]['key'] && input) {
                             var props = obj[key]['key'].split('.'),
-                            tempItem = input;
+                                tempItem = input;
                             for (var ii = 0; ii < props.length; ii++) {
-                                tempItem=tempItem[props[ii]];
+                                tempItem = tempItem[props[ii]];
                             }
-                            ele.set(key , tempItem);
+                            ele.set(key, tempItem);
                         }
-                        // Object.keys(obj[key]).forEach(function(key2) {
-                        //     console.log(key2, obj[key][key2]);
-                        // });
                     });
+                }
+                
 
-                    Polymer.dom(this.$.body).appendChild(ele);
-                },
+                Polymer.dom(this.$.body).appendChild(ele);
+            },
 
-                _savePassengerData: function(){
-                    var items = this.querySelectorAll('[required]');
-                    console.log(items);
-                    var items = Polymer.dom(this.$$('#content')).getDistributedNodes('[required]');
-                    console.log(items);
-                },
+            _savePassengerData: function() {
 
-                setLoad: function(val){
-                    if(val){
-                        this.$.savePassengers.disabled = true;
-                        this.$.savePassengers.label = "SAVING...";
-                    }else{
-                        this.$.savePassengers.disabled = false;
-                        this.$.savePassengers.label = "SAVE";
-                    }
+                var ele = this.$$('#content'),
+                    props = this.formatData.getProperties,
+                    validate = this.formatData.isValid,
+                    obj = {},
+                    validValue = validate.value || true;
+
+                if (validate && !this._validate(ele,validate,validValue)){
+                    return;
+                }
+                if (props.length) {
+                    //setting the object from get Properties array mentioned in infoFormats    
+                    props.forEach(function(val, index) {
+                        obj[val] = ele[val];
+                    });
                 }
 
-            });        
-        })();
+                this.fire('info-submit',obj);
+            },
+            
+            //checking if there's a validate method or property for the component
+            _validate: function(ele,validate,validValue){
+                if (validate.type == 'property') {
+                    //isValid is property
+                    if (ele[validate.name] !== validValue) {
+                        return false;
+                    }
+                } else {
+                    //when isValid is method
+                    if (ele[validate.name]() !== validValue) {
+                        return false;
+                    }
+
+                }
+                return true;
+            },
+
+            setLoad: function(val) {
+                var btn = this.$.savePassengers;
+                if (val) {
+                    btn.disabled = true;
+                    btn.label = "SAVING...";
+                } else {
+                    btn.disabled = false;
+                    btn.label = "SAVE";
+                }
+            }
+
+        });
+    })();
     </script>
 </dom-module>
