@@ -176,7 +176,7 @@ Example:
               id="home" 
               name="home" 
               class="main-nav">
-              <t-header normal-heading label="Profile">
+              <t-header normal-heading url="[[backUrl]]" label="Profile">
               </t-header>
               <template is="dom-repeat" items="[[navigationData]]" as="item">
                   <a  class="layout horizontal center section-small font-14 secondary-text border-bottom" href='[[siteUrl]][[item.type]]/[[item.category]][[item.param]]'>
