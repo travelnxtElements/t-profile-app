@@ -176,10 +176,10 @@ Example:
               id="home" 
               name="home" 
               class="main-nav">
-              <t-header normal-heading url="[[backUrl]]" label="Profile">
+              <t-header icon="[[backIcon]]" url="[[backUrl]]" normal-heading label="Profile">
               </t-header>
               <template is="dom-repeat" items="[[navigationData]]" as="item">
-                  <a  class="layout horizontal center section-small font-14 secondary-text border-bottom" href='[[siteUrl]][[item.type]]/[[item.category]][[item.param]]'>
+                  <a  class="layout horizontal center section-small font-14 secondary-text border-bottom" href$='[[siteUrl]][[item.type]]/[[item.category]][[item.param]]'>
                       <span class="flex">[[item.name]]</span>
                       <iron-icon class="icon" icon="icons:chevron-right"></iron-icon>
                   </a>
@@ -189,6 +189,7 @@ Example:
             <t-profile-list-page
               id="list"
               name="list"
+              back-icon="[[backIcon]]"
               site-url="[[siteUrl]]"
               format-data="[[listFormat]]"
               input="[[listData]]">
@@ -197,6 +198,8 @@ Example:
             <t-profile-info-page
               id="info"
               name="info"
+              back-icon="[[backIcon]]"
+              back-url="[[siteUrl]][[infoBackUrl]]"
               site-url="[[siteUrl]]"
               format-data="[[infoFormat]]"
               input="[[infoData]]">
@@ -279,7 +282,7 @@ Example:
                 ],
 
                 __routePageChanged: function (path) {
-                        if (!this.visible || path === undefined || path === null) {
+                        if (path === undefined || path === null) {
                             return;
                         }
 
@@ -315,6 +318,11 @@ Example:
 
                       }catch(e){
                         console.log(e);
+                      }
+                      if (this.queryParams.id) {
+                          this.infoBackUrl = 'list/' + this.subRouteType;
+                      } else {
+                          this.infoBackUrl = 'home/';
                       }
                     }else{
                         //considering this is homepage route.

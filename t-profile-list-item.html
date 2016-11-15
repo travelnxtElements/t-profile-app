@@ -37,15 +37,18 @@
             .item.iron-selected{
                 font-weight: normal;
             }
+            :host[is-open]{
+                background: #f5f5f5;
+            }
         </style>
 
         <div class="layout horizontal section-small font-12">
             <div class="flex label font-16">
                 [[label]]
             </div>
-          <paper-menu-button class="button secondary-text" horizontal-offset="-50" vertical-offset="20">
+          <paper-menu-button class="button secondary-text" horizontal-offset="-50" vertical-offset="20" opened="{{isOpen}}">
             <iron-icon icon="more-vert" class="dropdown-trigger" alt="menu"></iron-icon>
-            <paper-menu class="dropdown-content">
+            <paper-menu class="dropdown-content" >
                 <div class="section-small item font-12" type="edit" on-tap="_click">Edit</div>
                 <div class="section-small item font-12" type="delete" on-tap="_click">Delete</div>
             </paper-menu>
@@ -73,6 +76,11 @@
                         value: function(){
                             return {};
                         }
+                    },
+
+                    isOpen: {
+                        type: Boolean,
+                        reflectToAttribute:true
                     }
 
                 },

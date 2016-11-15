@@ -17,14 +17,14 @@
         }
         
         .addButton .icon {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             vertical-align: bottom;
-            margin: 0 3px 0 5px;
+            margin: 0 2px 0 5px;
         }
         </style>
-        <t-header normal-heading url="[[siteUrl]]home" label="[[_getHeader(formatData)]]"></t-header>
-        <div class="link-style section-small font-12 addButton" on-tap="_fireAddNew">
+        <t-header icon="[[backIcon]]" normal-heading url="[[siteUrl]]home" label="[[_getHeader(formatData)]]"></t-header>
+        <div class="link-style section-small font-14 addButton" on-tap="_fireAddNew">
             <iron-icon class="icon" icon="add"></iron-icon>Add new
         </div>
         <template is="dom-repeat" items="[[input]]" as="item" on-dom-change="_templateChange">
