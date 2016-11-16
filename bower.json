@@ -2,7 +2,7 @@
   "name": "t-profile-app",
   "description": "This repo will include the profile flow end to end",
   "main": "t-profile-app.html",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "authors": [
     "Rahul Pilkhwal <rahul.pilkhwal@tavisca.com>",
     "Shailesh Kumar Srivastava <ssrivastava@tavisca.com>",
@@ -42,7 +42,7 @@
     "t-profile-membership": "travelnxtElements/t-profile-membership",
     "t-profile-personalInfo": "travelnxtElements/t-profile-personalInfo",
     "t-profile-change-password": "travelnxtElements/t-profile-change-password",
-   	"t-mystique-auth": "travelnxtElements/t-mystique-auth#^1.0.0",
+    "t-mystique-auth": "travelnxtElements/t-mystique-auth#^1.0.0",
     "t-passenger-info": "travelnxtElements/t-passenger-info#^1.0.0",
     "t-address": "travelnxtElements/t-address#^1.1.5",
     "webcomponentsjs": "~0.7.14",
