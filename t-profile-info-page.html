@@ -78,7 +78,7 @@
             },
 
             _savePassengerData: function() {
-
+                if(this.$.savePassengers.disabled){return;}
                 var ele = this.$$('#content'),
                     props = this.formatData.getProperties,
                     validate = this.formatData.isValid,
