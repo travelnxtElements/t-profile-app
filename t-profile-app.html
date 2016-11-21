@@ -360,6 +360,11 @@ Example:
 
                 routeToHome: function(){
                     this.set('route.path','/home');
+                },
+
+                //setTheLoadButton to true or false
+                setLoadButton: function(val){
+                    this.$.info.setLoad(val);
                 }
             });
         })();

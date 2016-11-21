@@ -39,9 +39,9 @@
   "devDependencies": {
     "t-sign-up": "travelnxtElements/t-sign-up#^1.0.0",
     "t-sign-in": "travelnxtElements/t-sign-in#^1.0.0",
-    "t-profile-membership": "travelnxtElements/t-profile-membership",
-    "t-profile-personalInfo": "travelnxtElements/t-profile-personalInfo",
-    "t-profile-change-password": "travelnxtElements/t-profile-change-password",
+    "t-profile-membership": "travelnxtElements/t-profile-membership#^0.0.0",
+    "t-profile-personalInfo": "travelnxtElements/t-profile-personalInfo#^0.0.0",
+    "t-profile-change-password": "travelnxtElements/t-profile-change-password#^0.0.0",
     "t-mystique-auth": "travelnxtElements/t-mystique-auth#^1.0.0",
     "t-passenger-info": "travelnxtElements/t-passenger-info#^1.0.0",
     "t-address": "travelnxtElements/t-address#^1.1.5",
