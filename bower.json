@@ -2,7 +2,7 @@
   "name": "t-profile-app",
   "description": "This repo will include the profile flow end to end",
   "main": "t-profile-app.html",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "authors": [
     "Rahul Pilkhwal <rahul.pilkhwal@tavisca.com>",
     "Shailesh Kumar Srivastava <ssrivastava@tavisca.com>",
