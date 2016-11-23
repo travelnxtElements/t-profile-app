@@ -64,11 +64,18 @@
                             ele.set(key, obj[key]['value']);
                         } else if ( obj[key]['key'] && input) {
                             var props = obj[key]['key'].split('.'),
-                                tempItem = input;
+                                tempItem = input,
+                                isValuePresent = true;
                             for (var ii = 0; ii < props.length; ii++) {
-                                tempItem = tempItem[props[ii]];
+                                if (tempItem && tempItem[props[ii]]) {
+                                    tempItem = tempItem[props[ii]];
+                                } else {
+                                    isValuePresent = false;
+                                }
                             }
-                            ele.set(key, tempItem);
+                            if (isValuePresent) {
+                                ele.set(key, tempItem);                                
+                            }
                         }
                     });
                 }

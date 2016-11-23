@@ -331,6 +331,7 @@ Example:
                     var object = {};
                     object.type = this.subRouteType;
                     object.data = e.detail;
+                    object.operation = 'update';
                     if(this.queryParams && this.queryParams.id){
                         object.id = this.queryParams.id;
                     }
@@ -343,9 +344,17 @@ Example:
                     this.set('route.path','/info/'+ this.subRouteType);
                 },
 
-                _clickedOnDelete: function (e) {
-                    //run the delete method call some api component or translator decorator
+                _clickedOnDelete: function (e) {                    
+                    var profileSegment = this.profileInfo[this.subRouteType];
+                    if (profileSegment && profileSegment[e.detail.id]) {
+                        profileSegment.splice(e.detail.id, 1);
+                    }
 
+                    this.fire('profile-saved', {
+                        type: this.subRouteType,
+                        operation : 'delete', 
+                        data: this.profileInfo
+                    });
                 },
 
                 _clickedOnEdit: function (e) {
